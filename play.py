@@ -10,9 +10,10 @@ import numpy as np
 from typing import Dict, List, Tuple, Any, Optional, Union
 import logging
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('bulletverse')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("bulletverse")
 
 WIDTH, HEIGHT = 0, 0
 FPS = 60
@@ -28,7 +29,7 @@ COLORS = {
     "PURPLE": (128, 0, 128),
     "ORANGE": (255, 128, 0),
     "CYAN": (0, 255, 255),
-    "MAGENTA": (255, 0, 255)
+    "MAGENTA": (255, 0, 255),
 }
 
 BULLET_SPEED = 7
@@ -37,8 +38,13 @@ ENEMY_FIRE_RATE = 80
 NUM_ENEMIES = 6
 MAX_STAT_LEVEL = 8
 PLAYER_COLORS = [
-    COLORS["BLUE"], COLORS["GREEN"], COLORS["PURPLE"], COLORS["YELLOW"],
-    COLORS["ORANGE"], COLORS["CYAN"], COLORS["MAGENTA"]
+    COLORS["BLUE"],
+    COLORS["GREEN"],
+    COLORS["PURPLE"],
+    COLORS["YELLOW"],
+    COLORS["ORANGE"],
+    COLORS["CYAN"],
+    COLORS["MAGENTA"],
 ]
 
 SERVER_HOST = "localhost"
@@ -50,20 +56,20 @@ DIFFICULTY_SETTINGS = {
         "enemy_speed": 1.5,
         "enemy_health": 25,
         "enemy_damage": 8,
-        "xp_multiplier": 1.2
+        "xp_multiplier": 1.2,
     },
     "normal": {
         "enemy_speed": 2,
         "enemy_health": 30,
         "enemy_damage": 10,
-        "xp_multiplier": 1.0
+        "xp_multiplier": 1.0,
     },
     "hard": {
         "enemy_speed": 2.5,
         "enemy_health": 40,
         "enemy_damage": 15,
-        "xp_multiplier": 0.8
-    }
+        "xp_multiplier": 0.8,
+    },
 }
 
 
@@ -99,7 +105,6 @@ class LoadingScreen:
         self.tip_change_timer = 0
 
     def generate_tips(self):
-        """Returns a list of useful gameplay tips to show during loading"""
         return [
             "Upgrade your Health Max for longer survival in difficult levels.",
             "Bullet Penetration lets you hit multiple enemies with a single shot.",
@@ -120,20 +125,16 @@ class LoadingScreen:
             "Try different upgrade combinations to find your preferred playstyle.",
             "Enemies drop powerups more often when you're at low health.",
             "Your score increases faster on higher difficulty settings.",
-            "Use obstacles in the environment to block enemy line of sight."
+            "Use obstacles in the environment to block enemy line of sight.",
         ]
 
     def add_task(self, task_function, task_text, weight=1):
-        """Add a task to the loading queue"""
-        self.loading_tasks.append({
-            "function": task_function,
-            "text": task_text,
-            "weight": weight
-        })
+        self.loading_tasks.append(
+            {"function": task_function, "text": task_text, "weight": weight}
+        )
         self.max_progress = sum(task["weight"] for task in self.loading_tasks)
 
     def update(self, dt):
-        """Update loading animation"""
         self.dot_timer += dt
         if self.dot_timer > 0.5:
             self.animation_dots = (self.animation_dots + 1) % 4
@@ -155,8 +156,10 @@ class LoadingScreen:
         if len(self.particles) < 30 and pygame.time.get_ticks() % 100 < 10:
             self.add_particle()
 
-        if self.current_task_index < len(
-                self.loading_tasks) and not self.loading_complete:
+        if (
+            self.current_task_index < len(self.loading_tasks)
+            and not self.loading_complete
+        ):
             current_task = self.loading_tasks[self.current_task_index]
             self.current_task_text = current_task["text"]
 
@@ -173,7 +176,6 @@ class LoadingScreen:
                 self.current_task_text = f"Error: {str(e)}"
 
     def draw(self):
-        """Draw the loading screen"""
         self.screen.fill(self.colors["WHITE"])
 
         for particle in self.particles:
@@ -183,59 +185,79 @@ class LoadingScreen:
 
             particle_surface = pygame.Surface(
                 (int(particle["size"]) * 2, int(particle["size"]) * 2),
-                pygame.SRCALPHA)
-            pygame.draw.circle(particle_surface, color,
-                               (int(particle["size"]), int(particle["size"])),
-                               int(particle["size"]))
-            self.screen.blit(particle_surface,
-                             (pos[0] - int(particle["size"]),
-                              pos[1] - int(particle["size"])))
+                pygame.SRCALPHA,
+            )
+            pygame.draw.circle(
+                particle_surface,
+                color,
+                (int(particle["size"]), int(particle["size"])),
+                int(particle["size"]),
+            )
+            self.screen.blit(
+                particle_surface,
+                (
+                    pos[0] - int(particle["size"]),
+                    pos[1] - int(particle["size"]),
+                ),
+            )
 
-        title = self.title_font.render("BULLETVERSE.IO", True,
-                                       self.colors["BLUE"])
+        title = self.title_font.render(
+            "BULLETVERSE.IO", True, self.colors["BLUE"]
+        )
         title_rect = title.get_rect(center=(self.width // 2, self.height // 3))
         self.screen.blit(title, title_rect)
 
         dots = "." * self.animation_dots
-        loading_text = self.font.render(f"{self.current_task_text}{dots}",
-                                        True, self.colors["BLACK"])
-        text_rect = loading_text.get_rect(center=(self.width // 2,
-                                                  self.height // 2 + 50))
+        loading_text = self.font.render(
+            f"{self.current_task_text}{dots}", True, self.colors["BLACK"]
+        )
+        text_rect = loading_text.get_rect(
+            center=(self.width // 2, self.height // 2 + 50)
+        )
         self.screen.blit(loading_text, text_rect)
 
         bar_width = self.width // 2
         bar_height = 20
         bar_x = (self.width - bar_width) // 2
         bar_y = self.height // 2 + 100
-        pygame.draw.rect(self.screen,
-                         self.colors["GRAY"],
-                         (bar_x, bar_y, bar_width, bar_height),
-                         border_radius=10)
+        pygame.draw.rect(
+            self.screen,
+            self.colors["GRAY"],
+            (bar_x, bar_y, bar_width, bar_height),
+            border_radius=10,
+        )
 
         if self.max_progress > 0:
             fill_width = int(bar_width * (self.progress / self.max_progress))
-            pygame.draw.rect(self.screen,
-                             self.colors["BLUE"],
-                             (bar_x, bar_y, fill_width, bar_height),
-                             border_radius=10)
+            pygame.draw.rect(
+                self.screen,
+                self.colors["BLUE"],
+                (bar_x, bar_y, fill_width, bar_height),
+                border_radius=10,
+            )
 
-        percentage = int((self.progress / self.max_progress) *
-                         100) if self.max_progress > 0 else 0
-        percentage_text = self.font.render(f"{percentage}%", True,
-                                           self.colors["WHITE"])
+        percentage = (
+            int((self.progress / self.max_progress) * 100)
+            if self.max_progress > 0
+            else 0
+        )
+        percentage_text = self.font.render(
+            f"{percentage}%", True, self.colors["WHITE"]
+        )
         percentage_rect = percentage_text.get_rect(
-            center=(bar_x + bar_width // 2, bar_y + bar_height // 2))
+            center=(bar_x + bar_width // 2, bar_y + bar_height // 2)
+        )
         self.screen.blit(percentage_text, percentage_rect)
 
-        tip = self.font.render(f"Tip: {self.current_tip}", True,
-                               self.colors["DARK_GRAY"])
+        tip = self.font.render(
+            f"Tip: {self.current_tip}", True, self.colors["DARK_GRAY"]
+        )
         tip_rect = tip.get_rect(center=(self.width // 2, self.height - 50))
         self.screen.blit(tip, tip_rect)
 
         pygame.display.flip()
 
     def add_particle(self):
-        """Add decorative particles to the loading screen"""
         pos_x = random.randint(0, self.width)
         pos_y = random.randint(0, self.height)
         angle = random.uniform(0, 2 * math.pi)
@@ -247,14 +269,16 @@ class LoadingScreen:
         blue_value = random.randint(180, 255)
         color = (50, 100, blue_value)
 
-        self.particles.append({
-            "pos": [pos_x, pos_y],
-            "velocity": velocity,
-            "color": color,
-            "life": life,
-            "max_life": life,
-            "size": size
-        })
+        self.particles.append(
+            {
+                "pos": [pos_x, pos_y],
+                "velocity": velocity,
+                "color": color,
+                "life": life,
+                "max_life": life,
+                "size": size,
+            }
+        )
 
 
 class ParticleSystem:
@@ -262,24 +286,28 @@ class ParticleSystem:
     def __init__(self):
         self.particles = []
 
-    def add_particles(self,
-                      pos: Tuple[float, float],
-                      color: Tuple[int, int, int],
-                      count: int = 10,
-                      speed: float = 2.0,
-                      life: int = 30):
+    def add_particles(
+        self,
+        pos: Tuple[float, float],
+        color: Tuple[int, int, int],
+        count: int = 10,
+        speed: float = 2.0,
+        life: int = 30,
+    ):
         for _ in range(count):
             angle = random.uniform(0, 2 * math.pi)
             velocity = [speed * math.cos(angle), speed * math.sin(angle)]
             size = random.uniform(1, 3)
-            self.particles.append({
-                "pos": [pos[0], pos[1]],
-                "velocity": velocity,
-                "color": color,
-                "life": life,
-                "max_life": life,
-                "size": size
-            })
+            self.particles.append(
+                {
+                    "pos": [pos[0], pos[1]],
+                    "velocity": velocity,
+                    "color": color,
+                    "life": life,
+                    "max_life": life,
+                    "size": size,
+                }
+            )
             self.available_colors = {
                 "Blue": COLORS["BLUE"],
                 "Green": COLORS["GREEN"],
@@ -288,7 +316,7 @@ class ParticleSystem:
                 "Orange": COLORS["ORANGE"],
                 "Cyan": COLORS["CYAN"],
                 "Magenta": COLORS["MAGENTA"],
-                "Red": COLORS["RED"]
+                "Red": COLORS["RED"],
             }
         self.player_color_name = "Blue"
         self.player_color = self.available_colors[self.player_color_name]
@@ -311,12 +339,21 @@ class ParticleSystem:
 
             particle_surface = pygame.Surface(
                 (int(particle["size"]) * 2, int(particle["size"]) * 2),
-                pygame.SRCALPHA)
-            pygame.draw.circle(particle_surface, color,
-                               (int(particle["size"]), int(particle["size"])),
-                               int(particle["size"]))
-            screen.blit(particle_surface, (pos[0] - int(particle["size"]),
-                                           pos[1] - int(particle["size"])))
+                pygame.SRCALPHA,
+            )
+            pygame.draw.circle(
+                particle_surface,
+                color,
+                (int(particle["size"]), int(particle["size"])),
+                int(particle["size"]),
+            )
+            screen.blit(
+                particle_surface,
+                (
+                    pos[0] - int(particle["size"]),
+                    pos[1] - int(particle["size"]),
+                ),
+            )
 
 
 class PowerUp:
@@ -358,44 +395,72 @@ class PowerUp:
                 self.pulse_growing = True
 
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color,
-                           (int(self.pos[0]), int(self.pos[1])),
-                           int(self.radius + self.pulse_size), 2)
+        pygame.draw.circle(
+            screen,
+            self.color,
+            (int(self.pos[0]), int(self.pos[1])),
+            int(self.radius + self.pulse_size),
+            2,
+        )
 
-        pygame.draw.circle(screen, self.color,
-                           (int(self.pos[0]), int(self.pos[1])), self.radius)
+        pygame.draw.circle(
+            screen,
+            self.color,
+            (int(self.pos[0]), int(self.pos[1])),
+            self.radius,
+        )
 
         if self.type == "health":
-            pygame.draw.line(screen, COLORS["WHITE"],
-                             (self.pos[0] - 8, self.pos[1]),
-                             (self.pos[0] + 8, self.pos[1]), 3)
-            pygame.draw.line(screen, COLORS["WHITE"],
-                             (self.pos[0], self.pos[1] - 8),
-                             (self.pos[0], self.pos[1] + 8), 3)
+            pygame.draw.line(
+                screen,
+                COLORS["WHITE"],
+                (self.pos[0] - 8, self.pos[1]),
+                (self.pos[0] + 8, self.pos[1]),
+                3,
+            )
+            pygame.draw.line(
+                screen,
+                COLORS["WHITE"],
+                (self.pos[0], self.pos[1] - 8),
+                (self.pos[0], self.pos[1] + 8),
+                3,
+            )
         elif self.type == "shield":
-            pygame.draw.arc(screen, COLORS["WHITE"],
-                            (self.pos[0] - 8, self.pos[1] - 8, 16, 16),
-                            math.pi / 4, math.pi * 7 / 4, 3)
+            pygame.draw.arc(
+                screen,
+                COLORS["WHITE"],
+                (self.pos[0] - 8, self.pos[1] - 8, 16, 16),
+                math.pi / 4,
+                math.pi * 7 / 4,
+                3,
+            )
         elif self.type == "speed":
-            points = [(self.pos[0] - 5, self.pos[1] - 8),
-                      (self.pos[0], self.pos[1]),
-                      (self.pos[0] - 2, self.pos[1]),
-                      (self.pos[0] + 5, self.pos[1] + 8),
-                      (self.pos[0], self.pos[1]),
-                      (self.pos[0] + 2, self.pos[1])]
+            points = [
+                (self.pos[0] - 5, self.pos[1] - 8),
+                (self.pos[0], self.pos[1]),
+                (self.pos[0] - 2, self.pos[1]),
+                (self.pos[0] + 5, self.pos[1] + 8),
+                (self.pos[0], self.pos[1]),
+                (self.pos[0] + 2, self.pos[1]),
+            ]
             pygame.draw.lines(screen, COLORS["WHITE"], False, points, 2)
         elif self.type == "damage":
-            pygame.draw.polygon(screen, COLORS["WHITE"],
-                                [(self.pos[0], self.pos[1] - 8),
-                                 (self.pos[0] + 3, self.pos[1] - 3),
-                                 (self.pos[0] + 8, self.pos[1] - 3),
-                                 (self.pos[0] + 4, self.pos[1] + 2),
-                                 (self.pos[0] + 6, self.pos[1] + 8),
-                                 (self.pos[0], self.pos[1] + 5),
-                                 (self.pos[0] - 6, self.pos[1] + 8),
-                                 (self.pos[0] - 4, self.pos[1] + 2),
-                                 (self.pos[0] - 8, self.pos[1] - 3),
-                                 (self.pos[0] - 3, self.pos[1] - 3)])
+            pygame.draw.polygon(
+                screen,
+                COLORS["WHITE"],
+                [
+                    (self.pos[0], self.pos[1] - 8),
+                    (self.pos[0] + 3, self.pos[1] - 3),
+                    (self.pos[0] + 8, self.pos[1] - 3),
+                    (self.pos[0] + 4, self.pos[1] + 2),
+                    (self.pos[0] + 6, self.pos[1] + 8),
+                    (self.pos[0], self.pos[1] + 5),
+                    (self.pos[0] - 6, self.pos[1] + 8),
+                    (self.pos[0] - 4, self.pos[1] + 2),
+                    (self.pos[0] - 8, self.pos[1] - 3),
+                    (self.pos[0] - 3, self.pos[1] - 3),
+                ],
+            )
         else:
             font = pygame.font.Font(None, 20)
             text = font.render("XP", True, COLORS["WHITE"])
@@ -407,33 +472,36 @@ def spawn_enemy(difficulty: str = "normal") -> Dict:
     settings = DIFFICULTY_SETTINGS[difficulty]
 
     return {
-        "pos":
-        [random.randint(50, WIDTH - 50),
-         random.randint(50, HEIGHT - 50)],
+        "pos": [
+            random.randint(50, WIDTH - 50),
+            random.randint(50, HEIGHT - 50),
+        ],
         "angle": random.uniform(0, 2 * math.pi),
         "speed": settings["enemy_speed"] * random.uniform(0.8, 1.2),
         "health": settings["enemy_health"],
         "max_health": settings["enemy_health"],
         "fire_timer": random.randint(0, ENEMY_FIRE_RATE),
         "type": random.choice(["normal", "fast", "tank"]),
-        "size": random.uniform(0.8, 1.2) * 20
+        "size": random.uniform(0.8, 1.2) * 20,
     }
 
 
 class Button:
 
-    def __init__(self,
-                 x: int,
-                 y: int,
-                 width: int,
-                 height: int,
-                 text: str,
-                 color=COLORS["GRAY"],
-                 hover_color=(220, 220, 220),
-                 text_color=COLORS["BLACK"],
-                 border_radius: int = 0,
-                 font_size: int = 24,
-                 border_width: int = 2):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        text: str,
+        color=COLORS["GRAY"],
+        hover_color=(220, 220, 220),
+        text_color=COLORS["BLACK"],
+        border_radius: int = 0,
+        font_size: int = 24,
+        border_width: int = 2,
+    ):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.color = color
@@ -449,19 +517,21 @@ class Button:
         color = self.hover_color if self.hovered else self.color
 
         if self.border_radius > 0:
-            pygame.draw.rect(screen,
-                             color,
-                             self.rect,
-                             border_radius=self.border_radius)
-            pygame.draw.rect(screen,
-                             COLORS["BLACK"],
-                             self.rect,
-                             self.border_width,
-                             border_radius=self.border_radius)
+            pygame.draw.rect(
+                screen, color, self.rect, border_radius=self.border_radius
+            )
+            pygame.draw.rect(
+                screen,
+                COLORS["BLACK"],
+                self.rect,
+                self.border_width,
+                border_radius=self.border_radius,
+            )
         else:
             pygame.draw.rect(screen, color, self.rect)
-            pygame.draw.rect(screen, COLORS["BLACK"], self.rect,
-                             self.border_width)
+            pygame.draw.rect(
+                screen, COLORS["BLACK"], self.rect, self.border_width
+            )
 
         text_surf = self.font.render(self.text, True, self.text_color)
         text_rect = text_surf.get_rect(center=self.rect.center)
@@ -480,16 +550,18 @@ class Button:
 
 class Slider:
 
-    def __init__(self,
-                 x: int,
-                 y: int,
-                 width: int,
-                 height: int,
-                 min_value: float,
-                 max_value: float,
-                 start_value: float,
-                 label: str,
-                 color=COLORS["GRAY"]):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        min_value: float,
+        max_value: float,
+        start_value: float,
+        label: str,
+        color=COLORS["GRAY"],
+    ):
         self.rect = pygame.Rect(x, y, width, height)
         self.min_value = min_value
         self.max_value = max_value
@@ -503,39 +575,53 @@ class Slider:
         self.handle_pos = self.get_handle_pos()
 
     def get_handle_pos(self) -> int:
-        ratio = (self.value - self.min_value) / (self.max_value -
-                                                 self.min_value)
+        ratio = (self.value - self.min_value) / (
+            self.max_value - self.min_value
+        )
         return int(self.rect.x + (self.rect.width * ratio))
 
     def draw(self, screen):
         pygame.draw.rect(screen, COLORS["DARK_GRAY"], self.rect)
 
         filled_width = self.handle_pos - self.rect.x
-        filled_rect = pygame.Rect(self.rect.x, self.rect.y, filled_width,
-                                  self.rect.height)
+        filled_rect = pygame.Rect(
+            self.rect.x, self.rect.y, filled_width, self.rect.height
+        )
         pygame.draw.rect(screen, self.color, filled_rect)
 
         pygame.draw.circle(
-            screen, COLORS["WHITE"],
+            screen,
+            COLORS["WHITE"],
             (self.handle_pos, self.rect.y + self.rect.height // 2),
-            self.handle_radius)
+            self.handle_radius,
+        )
         pygame.draw.circle(
-            screen, COLORS["BLACK"],
+            screen,
+            COLORS["BLACK"],
             (self.handle_pos, self.rect.y + self.rect.height // 2),
-            self.handle_radius, 2)
+            self.handle_radius,
+            2,
+        )
 
-        label_surface = self.font.render(f"{self.label}: {self.value:.1f}",
-                                         True, COLORS["BLACK"])
-        label_rect = label_surface.get_rect(midleft=(self.rect.x,
-                                                     self.rect.y - 10))
+        label_surface = self.font.render(
+            f"{self.label}: {self.value:.1f}", True, COLORS["BLACK"]
+        )
+        label_rect = label_surface.get_rect(
+            midleft=(self.rect.x, self.rect.y - 10)
+        )
         screen.blit(label_surface, label_rect)
 
-    def update(self, mouse_pos: Tuple[int, int],
-               mouse_pressed: Tuple[bool, bool, bool]):
+    def update(
+        self,
+        mouse_pos: Tuple[int, int],
+        mouse_pressed: Tuple[bool, bool, bool],
+    ):
         handle_rect = pygame.Rect(
             self.handle_pos - self.handle_radius,
             self.rect.y + self.rect.height // 2 - self.handle_radius,
-            self.handle_radius * 2, self.handle_radius * 2)
+            self.handle_radius * 2,
+            self.handle_radius * 2,
+        )
 
         if mouse_pressed[0] and handle_rect.collidepoint(mouse_pos):
             self.dragging = True
@@ -544,13 +630,15 @@ class Slider:
             self.dragging = False
 
         if self.dragging:
-            x = max(self.rect.x,
-                    min(mouse_pos[0], self.rect.x + self.rect.width))
+            x = max(
+                self.rect.x, min(mouse_pos[0], self.rect.x + self.rect.width)
+            )
             self.handle_pos = x
 
             ratio = (self.handle_pos - self.rect.x) / self.rect.width
-            self.value = self.min_value + ratio * (self.max_value -
-                                                   self.min_value)
+            self.value = self.min_value + ratio * (
+                self.max_value - self.min_value
+            )
 
         return self.value
 
@@ -567,7 +655,7 @@ class NetworkClient:
             "players": {},
             "enemies": [],
             "bullets": [],
-            "powerups": []
+            "powerups": [],
         }
         self.receive_thread = None
         self.last_received = time.time()
@@ -621,7 +709,8 @@ class NetworkClient:
 
                 if "send_time" in self.game_state:
                     self.ping = int(
-                        (receive_time - self.game_state["send_time"]) * 1000)
+                        (receive_time - self.game_state["send_time"]) * 1000
+                    )
 
             except Exception as e:
                 logger.error(f"Receive error: {e}")
@@ -651,7 +740,7 @@ class GameServer:
             "enemies": [spawn_enemy() for _ in range(NUM_ENEMIES)],
             "bullets": [],
             "powerups": [],
-            "send_time": time.time()
+            "send_time": time.time(),
         }
         self.last_powerup_time = time.time()
         self.powerup_interval = 10
@@ -685,9 +774,9 @@ class GameServer:
 
                 player_id = client_socket.recv(1024).decode()
 
-                client_thread = threading.Thread(target=self.handle_client,
-                                                 args=(client_socket,
-                                                       player_id))
+                client_thread = threading.Thread(
+                    target=self.handle_client, args=(client_socket, player_id)
+                )
                 client_thread.daemon = True
                 client_thread.start()
 
@@ -716,26 +805,26 @@ class GameServer:
 
                     self.game_state["players"][player_id] = player_data
 
-                    if "new_bullets" in player_data and player_data[
-                            "new_bullets"]:
+                    if (
+                        "new_bullets" in player_data
+                        and player_data["new_bullets"]
+                    ):
                         for bullet in player_data["new_bullets"]:
-                            self.game_state["bullets"].append({
-                                "pos":
-                                bullet[:2],
-                                "angle":
-                                bullet[2],
-                                "penetration":
-                                bullet[3],
-                                "damage":
-                                bullet[4],
-                                "owner":
-                                player_id
-                            })
+                            self.game_state["bullets"].append(
+                                {
+                                    "pos": bullet[:2],
+                                    "angle": bullet[2],
+                                    "penetration": bullet[3],
+                                    "damage": bullet[4],
+                                    "owner": player_id,
+                                }
+                            )
 
                     self.game_state["send_time"] = time.time()
                     if "send_time" in player_data:
-                        self.game_state["last_ping"] = time.time(
-                        ) - player_data["send_time"]
+                        self.game_state["last_ping"] = (
+                            time.time() - player_data["send_time"]
+                        )
 
                     client_socket.send(pickle.dumps(self.game_state))
 
@@ -766,11 +855,9 @@ class GameServer:
         weights = [0.25, 0.2, 0.2, 0.2, 0.15]
         powerup_type = random.choices(types, weights=weights)[0]
 
-        self.game_state["powerups"].append({
-            "pos": pos,
-            "type": powerup_type,
-            "creation_time": time.time()
-        })
+        self.game_state["powerups"].append(
+            {"pos": pos, "type": powerup_type, "creation_time": time.time()}
+        )
 
     def update_game_state(self):
         current_time = time.time()
@@ -798,11 +885,13 @@ class GameServer:
 
             if self.game_state["players"] and random.random() < 0.05:
                 closest_player = None
-                min_dist = float('inf')
+                min_dist = float("inf")
 
                 for player_id, player in self.game_state["players"].items():
-                    dist = math.hypot(player["pos"][0] - enemy["pos"][0],
-                                      player["pos"][1] - enemy["pos"][1])
+                    dist = math.hypot(
+                        player["pos"][0] - enemy["pos"][0],
+                        player["pos"][1] - enemy["pos"][1],
+                    )
                     if dist < min_dist:
                         min_dist = dist
                         closest_player = player
@@ -810,25 +899,31 @@ class GameServer:
                 if closest_player:
                     target_angle = math.atan2(
                         closest_player["pos"][1] - enemy["pos"][1],
-                        closest_player["pos"][0] - enemy["pos"][0])
-                    angle_diff = (target_angle - enemy["angle"] +
-                                  math.pi) % (2 * math.pi) - math.pi
+                        closest_player["pos"][0] - enemy["pos"][0],
+                    )
+                    angle_diff = (target_angle - enemy["angle"] + math.pi) % (
+                        2 * math.pi
+                    ) - math.pi
                     enemy["angle"] += angle_diff * 0.1
 
             enemy["fire_timer"] -= 1
 
             if enemy["fire_timer"] <= 0:
                 enemy["fire_timer"] = ENEMY_FIRE_RATE * random.uniform(
-                    0.8, 1.2)
+                    0.8, 1.2
+                )
 
                 if self.game_state["players"]:
                     closest_player = None
-                    min_dist = float('inf')
+                    min_dist = float("inf")
 
-                    for player_id, player in self.game_state["players"].items(
-                    ):
-                        dist = math.hypot(player["pos"][0] - enemy["pos"][0],
-                                          player["pos"][1] - enemy["pos"][1])
+                    for player_id, player in self.game_state[
+                        "players"
+                    ].items():
+                        dist = math.hypot(
+                            player["pos"][0] - enemy["pos"][0],
+                            player["pos"][1] - enemy["pos"][1],
+                        )
                         if dist < min_dist:
                             min_dist = dist
                             closest_player = player
@@ -836,41 +931,53 @@ class GameServer:
                     if closest_player and min_dist < 400:
                         angle_to_player = math.atan2(
                             closest_player["pos"][1] - enemy["pos"][1],
-                            closest_player["pos"][0] - enemy["pos"][0])
+                            closest_player["pos"][0] - enemy["pos"][0],
+                        )
 
                         inaccuracy = min(0.2, min_dist / 2000)
                         angle_to_player += random.uniform(
-                            -inaccuracy, inaccuracy)
+                            -inaccuracy, inaccuracy
+                        )
 
-                        self.game_state["bullets"].append({
-                            "pos": [enemy["pos"][0], enemy["pos"][1]],
-                            "angle":
-                            angle_to_player,
-                            "penetration":
-                            1,
-                            "damage":
-                            DIFFICULTY_SETTINGS[self.difficulty]
-                            ["enemy_damage"],
-                            "owner":
-                            "enemy"
-                        })
+                        self.game_state["bullets"].append(
+                            {
+                                "pos": [enemy["pos"][0], enemy["pos"][1]],
+                                "angle": angle_to_player,
+                                "penetration": 1,
+                                "damage": DIFFICULTY_SETTINGS[self.difficulty][
+                                    "enemy_damage"
+                                ],
+                                "owner": "enemy",
+                            }
+                        )
 
         for bullet in list(self.game_state["bullets"]):
-            speed = ENEMY_BULLET_SPEED if bullet[
-                "owner"] == "enemy" else BULLET_SPEED
+            speed = (
+                ENEMY_BULLET_SPEED
+                if bullet["owner"] == "enemy"
+                else BULLET_SPEED
+            )
             bullet["pos"][0] += speed * math.cos(bullet["angle"])
             bullet["pos"][1] += speed * math.sin(bullet["angle"])
 
-            if (bullet["pos"][0] < 0 or bullet["pos"][0] > WIDTH
-                    or bullet["pos"][1] < 0 or bullet["pos"][1] > HEIGHT):
+            if (
+                bullet["pos"][0] < 0
+                or bullet["pos"][0] > WIDTH
+                or bullet["pos"][1] < 0
+                or bullet["pos"][1] > HEIGHT
+            ):
                 self.game_state["bullets"].remove(bullet)
                 continue
 
             if bullet["owner"] != "enemy":
                 for enemy in list(self.game_state["enemies"]):
-                    if math.hypot(bullet["pos"][0] - enemy["pos"][0],
-                                  bullet["pos"][1] -
-                                  enemy["pos"][1]) < enemy["size"]:
+                    if (
+                        math.hypot(
+                            bullet["pos"][0] - enemy["pos"][0],
+                            bullet["pos"][1] - enemy["pos"][1],
+                        )
+                        < enemy["size"]
+                    ):
                         enemy["health"] -= bullet["damage"]
                         bullet["penetration"] -= 1
 
@@ -880,26 +987,40 @@ class GameServer:
 
                         if enemy["health"] <= 0:
                             if random.random() < 0.1:
-                                self.game_state["powerups"].append({
-                                    "pos": [enemy["pos"][0], enemy["pos"][1]],
-                                    "type":
-                                    random.choice([
-                                        "health", "shield", "speed", "damage",
-                                        "xp"
-                                    ]),
-                                    "creation_time":
-                                    time.time()
-                                })
+                                self.game_state["powerups"].append(
+                                    {
+                                        "pos": [
+                                            enemy["pos"][0],
+                                            enemy["pos"][1],
+                                        ],
+                                        "type": random.choice(
+                                            [
+                                                "health",
+                                                "shield",
+                                                "speed",
+                                                "damage",
+                                                "xp",
+                                            ]
+                                        ),
+                                        "creation_time": time.time(),
+                                    }
+                                )
 
                             self.game_state["enemies"].remove(enemy)
                             self.game_state["enemies"].append(
-                                spawn_enemy(self.difficulty))
+                                spawn_enemy(self.difficulty)
+                            )
 
                             if bullet["owner"] in self.game_state["players"]:
                                 player = self.game_state["players"][
-                                    bullet["owner"]]
-                                xp_gain = 10 * DIFFICULTY_SETTINGS[
-                                    self.difficulty]["xp_multiplier"]
+                                    bullet["owner"]
+                                ]
+                                xp_gain = (
+                                    10
+                                    * DIFFICULTY_SETTINGS[self.difficulty][
+                                        "xp_multiplier"
+                                    ]
+                                )
 
                                 if "xp" not in player:
                                     player["xp"] = 0
@@ -914,7 +1035,8 @@ class GameServer:
                                     player["level"] += 1
                                     player["xp"] -= player["xp_to_next_level"]
                                     player["xp_to_next_level"] = int(
-                                        player["xp_to_next_level"] * 1.5)
+                                        player["xp_to_next_level"] * 1.5
+                                    )
 
                                     if "upgrade_points" not in player:
                                         player["upgrade_points"] = 0
@@ -924,8 +1046,13 @@ class GameServer:
 
             if bullet["owner"] == "enemy":
                 for player_id, player in self.game_state["players"].items():
-                    if math.hypot(bullet["pos"][0] - player["pos"][0],
-                                  bullet["pos"][1] - player["pos"][1]) < 20:
+                    if (
+                        math.hypot(
+                            bullet["pos"][0] - player["pos"][0],
+                            bullet["pos"][1] - player["pos"][1],
+                        )
+                        < 20
+                    ):
                         if "shield" in player and player["shield"] > 0:
                             player["shield"] -= bullet["damage"]
                             if player["shield"] < 0:
@@ -940,12 +1067,18 @@ class GameServer:
 
             for powerup in list(self.game_state["powerups"]):
                 for player_id, player in self.game_state["players"].items():
-                    if math.hypot(powerup["pos"][0] - player["pos"][0],
-                                  powerup["pos"][1] - player["pos"][1]) < 25:
+                    if (
+                        math.hypot(
+                            powerup["pos"][0] - player["pos"][0],
+                            powerup["pos"][1] - player["pos"][1],
+                        )
+                        < 25
+                    ):
                         if powerup["type"] == "health":
                             player["health"] = min(
                                 player["health"] + 25,
-                                player.get("max_health", 100))
+                                player.get("max_health", 100),
+                            )
                         elif powerup["type"] == "shield":
                             player["shield"] = 30
                             player["shield_end_time"] = time.time() + 10
@@ -968,7 +1101,8 @@ class GameServer:
                                 player["level"] += 1
                                 player["xp"] -= player["xp_to_next_level"]
                                 player["xp_to_next_level"] = int(
-                                    player["xp_to_next_level"] * 1.5)
+                                    player["xp_to_next_level"] * 1.5
+                                )
 
                                 if "upgrade_points" not in player:
                                     player["upgrade_points"] = 0
@@ -1008,7 +1142,7 @@ class Game:
             "Orange": COLORS["ORANGE"],
             "Cyan": COLORS["CYAN"],
             "Magenta": COLORS["MAGENTA"],
-            "Red": COLORS["RED"]
+            "Red": COLORS["RED"],
         }
         self.player_color_name = "Blue"
         self.player_color = self.available_colors[self.player_color_name]
@@ -1020,8 +1154,9 @@ class Game:
 
         self.fullscreen = True
         if self.fullscreen:
-            self.screen = pygame.display.set_mode((WIDTH, HEIGHT),
-                                                  pygame.FULLSCREEN)
+            self.screen = pygame.display.set_mode(
+                (WIDTH, HEIGHT), pygame.FULLSCREEN
+            )
         else:
             WIDTH, HEIGHT = 1280, 720
             self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -1055,27 +1190,33 @@ class Game:
         self.update_interval = 1.0
 
     def setup_loading_screen(self):
-        """Set up the loading screen and queue tasks"""
-        self.loading_screen = LoadingScreen(self.screen, WIDTH, HEIGHT,
-                                            self.font, self.title_font)
+        self.loading_screen = LoadingScreen(
+            self.screen, WIDTH, HEIGHT, self.font, self.title_font
+        )
 
-        self.loading_screen.add_task(self.load_settings, "Loading settings",
-                                     10)
-        self.loading_screen.add_task(self.initialize_particles,
-                                     "Initializing particles", 5)
-        self.loading_screen.add_task(self.load_sounds, "Loading game sounds",
-                                     20)
-        self.loading_screen.add_task(self.initialize_menus, "Setting up menus",
-                                     15)
-        self.loading_screen.add_task(self.setup_discord_rpc,
-                                     "Connecting to Discord", 20)
-        self.loading_screen.add_task(self.prepare_network, "Preparing network",
-                                     10)
-        self.loading_screen.add_task(self.reset_game,
-                                     "Initializing game state", 15)
+        self.loading_screen.add_task(
+            self.load_settings, "Loading settings", 10
+        )
+        self.loading_screen.add_task(
+            self.initialize_particles, "Initializing particles", 5
+        )
+        self.loading_screen.add_task(
+            self.load_sounds, "Loading game sounds", 20
+        )
+        self.loading_screen.add_task(
+            self.initialize_menus, "Setting up menus", 15
+        )
+        self.loading_screen.add_task(
+            self.setup_discord_rpc, "Connecting to Discord", 20
+        )
+        self.loading_screen.add_task(
+            self.prepare_network, "Preparing network", 10
+        )
+        self.loading_screen.add_task(
+            self.reset_game, "Initializing game state", 15
+        )
 
     def initialize_particles(self):
-        """Initialize the particle system"""
         self.particles = ParticleSystem()
         self.powerups = []
         self.active_effects = {}
@@ -1083,7 +1224,6 @@ class Game:
         time.sleep(0.1)
 
     def initialize_menus(self):
-        """Initialize all menus"""
         menu_width = 450
         menu_height = 600
         button_width = 350
@@ -1092,56 +1232,62 @@ class Game:
         menu_y = (HEIGHT - menu_height) // 2
 
         self.menu_buttons = {
-            "singleplayer":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 120,
-                   button_width,
-                   button_height,
-                   "Singleplayer",
-                   border_radius=10,
-                   font_size=30),
-            "host":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 200,
-                   button_width,
-                   button_height,
-                   "Host Game (soon)",
-                   border_radius=10,
-                   font_size=30),
-            "join":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 280,
-                   button_width,
-                   button_height,
-                   "Join Game (soon)",
-                   border_radius=10,
-                   font_size=30),
-            "cosmetics":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 360,
-                   button_width,
-                   button_height,
-                   "Customize Tank",
-                   border_radius=10,
-                   font_size=30),
-            "settings":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 440,
-                   button_width,
-                   button_height,
-                   "Settings",
-                   border_radius=10,
-                   font_size=30),
-            "quit":
-            Button(menu_x + (menu_width - button_width) // 2,
-                   menu_y + 520,
-                   button_width,
-                   button_height,
-                   "Quit",
-                   border_radius=10,
-                   font_size=30,
-                   color=COLORS["RED"],
-                   hover_color=(255, 100, 100))
+            "singleplayer": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 120,
+                button_width,
+                button_height,
+                "Singleplayer",
+                border_radius=10,
+                font_size=30,
+            ),
+            "host": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 200,
+                button_width,
+                button_height,
+                "Host Game (soon)",
+                border_radius=10,
+                font_size=30,
+            ),
+            "join": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 280,
+                button_width,
+                button_height,
+                "Join Game (soon)",
+                border_radius=10,
+                font_size=30,
+            ),
+            "cosmetics": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 360,
+                button_width,
+                button_height,
+                "Customize Tank",
+                border_radius=10,
+                font_size=30,
+            ),
+            "settings": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 440,
+                button_width,
+                button_height,
+                "Settings",
+                border_radius=10,
+                font_size=30,
+            ),
+            "quit": Button(
+                menu_x + (menu_width - button_width) // 2,
+                menu_y + 520,
+                button_width,
+                button_height,
+                "Quit",
+                border_radius=10,
+                font_size=30,
+                color=COLORS["RED"],
+                hover_color=(255, 100, 100),
+            ),
         }
 
         left_column_x = WIDTH // 2 - 220
@@ -1149,149 +1295,174 @@ class Game:
         row_height = 70
 
         self.settings_sliders = {
-            "sensitivity":
-            Slider(left_column_x, HEIGHT // 2 - 100, 200, 20, 0.1, 3.0,
-                   self.mouse_sensitivity, "Mouse Sensitivity",
-                   COLORS["BLUE"]),
-            "sound":
-            Slider(left_column_x, HEIGHT // 2 - 100 + row_height, 200, 20, 0.0,
-                   1.0, self.sound_volume, "Sound Volume", COLORS["GREEN"]),
-            "music":
-            Slider(left_column_x, HEIGHT // 2 - 100 + row_height * 2, 200, 20,
-                   0.0, 1.0, self.music_volume, "Music Volume",
-                   COLORS["PURPLE"])
+            "sensitivity": Slider(
+                left_column_x,
+                HEIGHT // 2 - 100,
+                200,
+                20,
+                0.1,
+                3.0,
+                self.mouse_sensitivity,
+                "Mouse Sensitivity",
+                COLORS["BLUE"],
+            ),
+            "sound": Slider(
+                left_column_x,
+                HEIGHT // 2 - 100 + row_height,
+                200,
+                20,
+                0.0,
+                1.0,
+                self.sound_volume,
+                "Sound Volume",
+                COLORS["GREEN"],
+            ),
+            "music": Slider(
+                left_column_x,
+                HEIGHT // 2 - 100 + row_height * 2,
+                200,
+                20,
+                0.0,
+                1.0,
+                self.music_volume,
+                "Music Volume",
+                COLORS["PURPLE"],
+            ),
         }
 
         self.settings_buttons = {
-            "fullscreen":
-            Button(right_column_x,
-                   HEIGHT // 2 - 100,
-                   200,
-                   40,
-                   f"Fullscreen: {'ON' if self.fullscreen else 'OFF'}",
-                   border_radius=5),
-            "particles":
-            Button(
+            "fullscreen": Button(
+                right_column_x,
+                HEIGHT // 2 - 100,
+                200,
+                40,
+                f"Fullscreen: {'ON' if self.fullscreen else 'OFF'}",
+                border_radius=5,
+            ),
+            "particles": Button(
                 right_column_x,
                 HEIGHT // 2 - 100 + row_height,
                 200,
                 40,
                 f"Particle Effects: {'ON' if self.particle_effects else 'OFF'}",
-                border_radius=5),
-            "fps":
-            Button(right_column_x,
-                   HEIGHT // 2 - 100 + row_height * 2,
-                   200,
-                   40,
-                   f"FPS Display: {'ON' if self.fps_display else 'OFF'}",
-                   border_radius=5),
-            "music":
-            Button(right_column_x,
-                   HEIGHT // 2 - 100 + row_height * 3,
-                   200,
-                   40,
-                   "Toggle Music",
-                   color=COLORS["BLUE"],
-                   hover_color=(100, 150, 255),
-                   border_radius=5),
-            "back":
-            Button(WIDTH // 2 - 100,
-                   HEIGHT // 2 + 180,
-                   200,
-                   50,
-                   "Back",
-                   color=COLORS["RED"],
-                   hover_color=(255, 100, 100),
-                   border_radius=5)
+                border_radius=5,
+            ),
+            "fps": Button(
+                right_column_x,
+                HEIGHT // 2 - 100 + row_height * 2,
+                200,
+                40,
+                f"FPS Display: {'ON' if self.fps_display else 'OFF'}",
+                border_radius=5,
+            ),
+            "music": Button(
+                right_column_x,
+                HEIGHT // 2 - 100 + row_height * 3,
+                200,
+                40,
+                "Toggle Music",
+                color=COLORS["BLUE"],
+                hover_color=(100, 150, 255),
+                border_radius=5,
+            ),
+            "back": Button(
+                WIDTH // 2 - 100,
+                HEIGHT // 2 + 180,
+                200,
+                50,
+                "Back",
+                color=COLORS["RED"],
+                hover_color=(255, 100, 100),
+                border_radius=5,
+            ),
         }
 
         self.difficulty_buttons = {
-            "easy":
-            Button(WIDTH // 2 - 200,
-                   HEIGHT // 2 - 50,
-                   120,
-                   40,
-                   "Easy",
-                   color=COLORS["GREEN"],
-                   hover_color=(100, 255, 100),
-                   border_radius=5),
-            "normal":
-            Button(WIDTH // 2 - 60,
-                   HEIGHT // 2 - 50,
-                   120,
-                   40,
-                   "Normal",
-                   color=COLORS["BLUE"],
-                   hover_color=(100, 150, 255),
-                   border_radius=5),
-            "hard":
-            Button(WIDTH // 2 + 80,
-                   HEIGHT // 2 - 50,
-                   120,
-                   40,
-                   "Hard",
-                   color=COLORS["RED"],
-                   hover_color=(255, 100, 100),
-                   border_radius=5)
+            "easy": Button(
+                WIDTH // 2 - 200,
+                HEIGHT // 2 - 50,
+                120,
+                40,
+                "Easy",
+                color=COLORS["GREEN"],
+                hover_color=(100, 255, 100),
+                border_radius=5,
+            ),
+            "normal": Button(
+                WIDTH // 2 - 60,
+                HEIGHT // 2 - 50,
+                120,
+                40,
+                "Normal",
+                color=COLORS["BLUE"],
+                hover_color=(100, 150, 255),
+                border_radius=5,
+            ),
+            "hard": Button(
+                WIDTH // 2 + 80,
+                HEIGHT // 2 - 50,
+                120,
+                40,
+                "Hard",
+                color=COLORS["RED"],
+                hover_color=(255, 100, 100),
+                border_radius=5,
+            ),
         }
 
         self.host_buttons = {
-            "start":
-            Button(WIDTH // 2 - 100,
-                   HEIGHT // 2 + 50,
-                   200,
-                   50,
-                   "Start Server",
-                   color=COLORS["GREEN"],
-                   hover_color=(100, 255, 100),
-                   border_radius=5),
-            "back":
-            Button(WIDTH // 2 - 100,
-                   HEIGHT // 2 + 120,
-                   200,
-                   50,
-                   "Back",
-                   color=COLORS["RED"],
-                   hover_color=(255, 100, 100),
-                   border_radius=5)
+            "start": Button(
+                WIDTH // 2 - 100,
+                HEIGHT // 2 + 50,
+                200,
+                50,
+                "Start Server",
+                color=COLORS["GREEN"],
+                hover_color=(100, 255, 100),
+                border_radius=5,
+            ),
+            "back": Button(
+                WIDTH // 2 - 100,
+                HEIGHT // 2 + 120,
+                200,
+                50,
+                "Back",
+                color=COLORS["RED"],
+                hover_color=(255, 100, 100),
+                border_radius=5,
+            ),
         }
 
         self.join_buttons = {
-            "connect":
-            Button(WIDTH // 2 - 100,
-                   HEIGHT // 2 + 50,
-                   200,
-                   50,
-                   "Connect",
-                   color=COLORS["GREEN"],
-                   hover_color=(100, 255, 100),
-                   border_radius=5),
-            "back":
-            Button(WIDTH // 2 - 100,
-                   HEIGHT // 2 + 120,
-                   200,
-                   50,
-                   "Back",
-                   color=COLORS["RED"],
-                   hover_color=(255, 100, 100),
-                   border_radius=5)
+            "connect": Button(
+                WIDTH // 2 - 100,
+                HEIGHT // 2 + 50,
+                200,
+                50,
+                "Connect",
+                color=COLORS["GREEN"],
+                hover_color=(100, 255, 100),
+                border_radius=5,
+            ),
+            "back": Button(
+                WIDTH // 2 - 100,
+                HEIGHT // 2 + 120,
+                200,
+                50,
+                "Back",
+                color=COLORS["RED"],
+                hover_color=(255, 100, 100),
+                border_radius=5,
+            ),
         }
 
         self.game_buttons = {
-            "upgrade":
-            Button(WIDTH - 210,
-                   10,
-                   200,
-                   50,
-                   "Upgrade Stats [U]",
-                   border_radius=5),
-            "menu":
-            Button(WIDTH - 210,
-                   70,
-                   200,
-                   50,
-                   "Main Menu [ESC]",
-                   border_radius=5)
+            "upgrade": Button(
+                WIDTH - 210, 10, 200, 50, "Upgrade Stats [U]", border_radius=5
+            ),
+            "menu": Button(
+                WIDTH - 210, 70, 200, 50, "Main Menu [ESC]", border_radius=5
+            ),
         }
 
         self.host_port = SERVER_PORT
@@ -1329,21 +1500,23 @@ class Game:
                 "",
                 color=self.available_colors[color_name],
                 hover_color=self.available_colors[color_name],
-                border_radius=10)
+                border_radius=10,
+            )
 
-        self.cosmetics_back_button = Button(menu_x + (menu_width - 200) // 2,
-                                            menu_y + menu_height - 80,
-                                            200,
-                                            50,
-                                            "Back",
-                                            color=COLORS["RED"],
-                                            hover_color=(255, 100, 100),
-                                            border_radius=10)
+        self.cosmetics_back_button = Button(
+            menu_x + (menu_width - 200) // 2,
+            menu_y + menu_height - 80,
+            200,
+            50,
+            "Back",
+            color=COLORS["RED"],
+            hover_color=(255, 100, 100),
+            border_radius=10,
+        )
 
         time.sleep(0.3)
 
     def prepare_network(self):
-        """Initialize network components"""
         self.client = NetworkClient(SERVER_HOST, SERVER_PORT)
         self.server = None
         self.multiplayer_mode = False
@@ -1353,37 +1526,38 @@ class Game:
 
     def load_settings(self):
         try:
-            with open('settings.pkl', 'rb') as f:
+            with open("settings.pkl", "rb") as f:
                 settings = pickle.load(f)
-                self.fullscreen = settings.get('fullscreen', True)
-                self.mouse_sensitivity = settings.get('mouse_sensitivity', 1.0)
-                self.sound_volume = settings.get('sound_volume', 0.7)
-                self.music_volume = settings.get('music_volume', 0.5)
-                self.particle_effects = settings.get('particle_effects', True)
-                self.fps_display = settings.get('fps_display', True)
+                self.fullscreen = settings.get("fullscreen", True)
+                self.mouse_sensitivity = settings.get("mouse_sensitivity", 1.0)
+                self.sound_volume = settings.get("sound_volume", 0.7)
+                self.music_volume = settings.get("music_volume", 0.5)
+                self.particle_effects = settings.get("particle_effects", True)
+                self.fps_display = settings.get("fps_display", True)
 
-                color_name = settings.get('player_color_name', 'Blue')
+                color_name = settings.get("player_color_name", "Blue")
                 if color_name in self.available_colors:
                     self.player_color_name = color_name
                     self.player_color = self.available_colors[
-                        self.player_color_name]
+                        self.player_color_name
+                    ]
         except:
             pass
         time.sleep(0.2)
 
     def save_settings(self):
         settings = {
-            'fullscreen': self.fullscreen,
-            'mouse_sensitivity': self.mouse_sensitivity,
-            'sound_volume': self.sound_volume,
-            'music_volume': self.music_volume,
-            'particle_effects': self.particle_effects,
-            'fps_display': self.fps_display,
-            'player_color_name': self.player_color_name
+            "fullscreen": self.fullscreen,
+            "mouse_sensitivity": self.mouse_sensitivity,
+            "sound_volume": self.sound_volume,
+            "music_volume": self.music_volume,
+            "particle_effects": self.particle_effects,
+            "fps_display": self.fps_display,
+            "player_color_name": self.player_color_name,
         }
 
         try:
-            with open('settings.pkl', 'wb') as f:
+            with open("settings.pkl", "wb") as f:
                 pickle.dump(settings, f)
         except Exception as e:
             logger.error(f"Error saving settings: {e}")
@@ -1391,54 +1565,58 @@ class Game:
     def load_sounds(self):
         try:
             pygame.mixer.quit()
-            pygame.mixer.init(frequency=44100,
-                              size=-16,
-                              channels=2,
-                              buffer=4096)
+            pygame.mixer.init(
+                frequency=44100, size=-16, channels=2, buffer=4096
+            )
             logger.info("Sound mixer initialized with custom parameters")
         except Exception as e:
             logger.warning(f"Could not initialize mixer: {e}")
 
         self.sounds = {
-            'shoot': None,
-            'hit': None,
-            'powerup': None,
-            'level_up': None,
-            'death': None,
-            'button': None
+            "shoot": None,
+            "hit": None,
+            "powerup": None,
+            "level_up": None,
+            "death": None,
+            "button": None,
         }
 
         if pygame.mixer.get_init():
             try:
                 import os
-                sounds_dir = 'assets/sounds'
-                if not os.path.exists('assets'):
-                    os.makedirs('assets')
+
+                sounds_dir = "assets/sounds"
+                if not os.path.exists("assets"):
+                    os.makedirs("assets")
                 if not os.path.exists(sounds_dir):
                     os.makedirs(sounds_dir)
                     logger.warning(
-                        f"Created missing sounds directory: {sounds_dir}")
+                        f"Created missing sounds directory: {sounds_dir}"
+                    )
 
                 sound_files = {
-                    'shoot': os.path.join(sounds_dir, 'shoot.wav'),
-                    'hit': os.path.join(sounds_dir, 'hit.wav'),
-                    'powerup': os.path.join(sounds_dir, 'powerup.wav'),
-                    'level_up': os.path.join(sounds_dir, 'levelup.wav'),
-                    'death': os.path.join(sounds_dir, 'death.wav'),
-                    'button': os.path.join(sounds_dir, 'button.wav')
+                    "shoot": os.path.join(sounds_dir, "shoot.wav"),
+                    "hit": os.path.join(sounds_dir, "hit.wav"),
+                    "powerup": os.path.join(sounds_dir, "powerup.wav"),
+                    "level_up": os.path.join(sounds_dir, "levelup.wav"),
+                    "death": os.path.join(sounds_dir, "death.wav"),
+                    "button": os.path.join(sounds_dir, "button.wav"),
                 }
 
                 for sound_name, file_path in sound_files.items():
                     try:
                         if os.path.exists(file_path):
                             self.sounds[sound_name] = pygame.mixer.Sound(
-                                file_path)
+                                file_path
+                            )
                         else:
                             logger.warning(
-                                f"Sound file not found: {file_path}")
+                                f"Sound file not found: {file_path}"
+                            )
                     except Exception as e:
                         logger.warning(
-                            f"Failed to load sound {sound_name}: {e}")
+                            f"Failed to load sound {sound_name}: {e}"
+                        )
 
                 for sound in self.sounds.values():
                     if sound:
@@ -1451,19 +1629,19 @@ class Game:
                 logger.warning(f"Error initializing sounds: {e}")
         else:
             logger.warning(
-                "Sound mixer not initialized, continuing without sound")
+                "Sound mixer not initialized, continuing without sound"
+            )
 
         self.load_and_play_background_music()
 
         time.sleep(0.5)
 
     def load_and_play_background_music(self):
-        """Dedicated method to handle background music with robust error handling"""
         try:
             import os
 
             possible_paths = [
-                'assets/sounds/background.mp3',
+                "assets/sounds/background.mp3",
             ]
 
             music_file = None
@@ -1481,7 +1659,7 @@ class Game:
                 logger.warning(
                     f"No background music file found. Checked paths: {possible_paths}"
                 )
-                os.makedirs('assets/sounds', exist_ok=True)
+                os.makedirs("assets/sounds", exist_ok=True)
                 return
 
             try:
@@ -1511,7 +1689,6 @@ class Game:
             logger.error(f"Music initialization failed: {e}")
 
     def toggle_music(self):
-        """Toggle background music on/off"""
         try:
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.pause()
@@ -1523,7 +1700,7 @@ class Game:
                 logger.info("Music resumed")
         except Exception as e:
             logger.warning(f"Error toggling music: {e}")
-            if hasattr(self, 'music_sound'):
+            if hasattr(self, "music_sound"):
                 try:
                     self.music_sound.stop()
                     self.music_sound.play(-1)
@@ -1542,7 +1719,7 @@ class Game:
 
     def setup_discord_rpc(self):
         try:
-            client_id = '1345600362706374717'
+            client_id = "1345600362706374717"
             self.rpc = Presence(client_id)
             self.rpc.connect()
             self.rpc.update(
@@ -1550,10 +1727,10 @@ class Game:
                 state=".gg/XVN6mYv5AJ",
                 large_image="https://i.imgur.com/vn4pYBH.png",
                 large_text="Bulletverse.io",
-                small_image=
-                "https://th.bing.com/th/id/R.da61fa152c102c46c16786b9f79402f8?rik=l5kvYddcePaDtw&pid=ImgRaw&r=0",
+                small_image="https://th.bing.com/th/id/R.da61fa152c102c46c16786b9f79402f8?rik=l5kvYddcePaDtw&pid=ImgRaw&r=0",
                 small_text="https://discord.gg/XVN6mYv5AJ",
-                start=int(time.time()))
+                start=int(time.time()),
+            )
             logger.info("Discord RPC connected")
         except:
             self.rpc = None
@@ -1588,49 +1765,60 @@ class Game:
                 "",
                 color=self.available_colors[color_name],
                 hover_color=self.available_colors[color_name],
-                border_radius=10)
+                border_radius=10,
+            )
 
-        self.cosmetics_back_button = Button(menu_x + (menu_width - 200) // 2,
-                                            menu_y + menu_height - 80,
-                                            200,
-                                            50,
-                                            "Back",
-                                            color=COLORS["RED"],
-                                            hover_color=(255, 100, 100),
-                                            border_radius=10)
+        self.cosmetics_back_button = Button(
+            menu_x + (menu_width - 200) // 2,
+            menu_y + menu_height - 80,
+            200,
+            50,
+            "Back",
+            color=COLORS["RED"],
+            hover_color=(255, 100, 100),
+            border_radius=10,
+        )
         time.sleep(0.2)
 
     def draw_cosmetics_menu(self):
         if not self.show_cosmetics_menu:
             return
 
-        if not hasattr(self, 'cosmetics_overlay'):
-            self.cosmetics_overlay = pygame.Surface((WIDTH, HEIGHT),
-                                                    pygame.SRCALPHA)
+        if not hasattr(self, "cosmetics_overlay"):
+            self.cosmetics_overlay = pygame.Surface(
+                (WIDTH, HEIGHT), pygame.SRCALPHA
+            )
             self.cosmetics_overlay.fill((0, 0, 0, 128))
         self.screen.blit(self.cosmetics_overlay, (0, 0))
 
         menu_width, menu_height = 500, 500
         menu_x, menu_y = (WIDTH - menu_width) // 2, (HEIGHT - menu_height) // 2
 
-        pygame.draw.rect(self.screen,
-                         COLORS["WHITE"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=15)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=15)
+        pygame.draw.rect(
+            self.screen,
+            COLORS["WHITE"],
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=15,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=15,
+        )
 
-        title = self.title_font.render("Tank Customization", True,
-                                       COLORS["BLACK"])
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 40))
+        title = self.title_font.render(
+            "Tank Customization", True, COLORS["BLACK"]
+        )
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 40)
+        )
         self.screen.blit(title, title_rect)
 
-        subtitle = self.font.render("Select Tank Color:", True,
-                                    COLORS["BLACK"])
+        subtitle = self.font.render(
+            "Select Tank Color:", True, COLORS["BLACK"]
+        )
         subtitle_rect = subtitle.get_rect(midleft=(menu_x + 50, menu_y + 90))
         self.screen.blit(subtitle, subtitle_rect)
 
@@ -1642,11 +1830,9 @@ class Game:
             if color_name == self.player_color_name:
                 rect = button.rect.copy()
                 rect.inflate_ip(10, 10)
-                pygame.draw.rect(self.screen,
-                                 COLORS["BLACK"],
-                                 rect,
-                                 3,
-                                 border_radius=10)
+                pygame.draw.rect(
+                    self.screen, COLORS["BLACK"], rect, 3, border_radius=10
+                )
 
         self.cosmetics_back_button.update(mouse_pos)
         self.cosmetics_back_button.draw(self.screen)
@@ -1689,18 +1875,9 @@ class Game:
         }
 
         self.active_effects = {
-            "shield": {
-                "active": False,
-                "end_time": 0
-            },
-            "speed_boost": {
-                "active": False,
-                "end_time": 0
-            },
-            "damage_boost": {
-                "active": False,
-                "end_time": 0
-            }
+            "shield": {"active": False, "end_time": 0},
+            "speed_boost": {"active": False, "end_time": 0},
+            "damage_boost": {"active": False, "end_time": 0},
         }
 
         self.reload_timer = 0
@@ -1714,18 +1891,20 @@ class Game:
 
         time.sleep(0.3)
 
-    def draw_tank(self,
-                  pos,
-                  angle,
-                  color=COLORS["BLUE"],
-                  shield=False,
-                  size=20):
+    def draw_tank(
+        self, pos, angle, color=COLORS["BLUE"], shield=False, size=20
+    ):
         outline_size = size + 2
-        pygame.draw.circle(self.screen, COLORS["BLACK"],
-                           (int(pos[0]), int(pos[1])), outline_size)
+        pygame.draw.circle(
+            self.screen,
+            COLORS["BLACK"],
+            (int(pos[0]), int(pos[1])),
+            outline_size,
+        )
 
-        pygame.draw.circle(self.screen, color, (int(pos[0]), int(pos[1])),
-                           size)
+        pygame.draw.circle(
+            self.screen, color, (int(pos[0]), int(pos[1])), size
+        )
 
         barrel_length = size * 1.25
         barrel_width = int(size / 4)
@@ -1734,46 +1913,75 @@ class Game:
         barrel_x = pos[0] + barrel_length * math.cos(angle)
         barrel_y = pos[1] + barrel_length * math.sin(angle)
 
-        pygame.draw.line(self.screen, COLORS["BLACK"],
-                         (int(pos[0]), int(pos[1])),
-                         (int(barrel_x), int(barrel_y)), outline_width)
+        pygame.draw.line(
+            self.screen,
+            COLORS["BLACK"],
+            (int(pos[0]), int(pos[1])),
+            (int(barrel_x), int(barrel_y)),
+            outline_width,
+        )
 
-        pygame.draw.line(self.screen, color, (int(pos[0]), int(pos[1])),
-                         (int(barrel_x), int(barrel_y)), barrel_width)
+        pygame.draw.line(
+            self.screen,
+            color,
+            (int(pos[0]), int(pos[1])),
+            (int(barrel_x), int(barrel_y)),
+            barrel_width,
+        )
 
         if shield:
             shield_radius = size + 5
             for i in range(3):
                 pulse_offset = (time.time() * 3) % 1.0
                 pulse_size = shield_radius + i * 2 + pulse_offset * 2
-                pygame.draw.circle(self.screen, (100, 150, 255, 100),
-                                   (int(pos[0]), int(pos[1])), int(pulse_size),
-                                   2)
+                pygame.draw.circle(
+                    self.screen,
+                    (100, 150, 255, 100),
+                    (int(pos[0]), int(pos[1])),
+                    int(pulse_size),
+                    2,
+                )
 
     def draw_bullets(self):
         for bullet in self.bullets:
-            pygame.draw.circle(self.screen, COLORS["BLUE"],
-                               (int(bullet[0]), int(bullet[1])), 5)
+            pygame.draw.circle(
+                self.screen,
+                COLORS["BLUE"],
+                (int(bullet[0]), int(bullet[1])),
+                5,
+            )
 
         for bullet in self.enemy_bullets:
-            pygame.draw.circle(self.screen, COLORS["RED"],
-                               (int(bullet[0]), int(bullet[1])), 5)
+            pygame.draw.circle(
+                self.screen, COLORS["RED"], (int(bullet[0]), int(bullet[1])), 5
+            )
 
         if self.multiplayer_mode and "bullets" in self.client.game_state:
             for bullet in self.client.game_state["bullets"]:
-                if "owner" in bullet and bullet[
-                        "owner"] == self.client.player_id:
+                if (
+                    "owner" in bullet
+                    and bullet["owner"] == self.client.player_id
+                ):
                     continue
 
-                color = COLORS["YELLOW"] if bullet[
-                    "owner"] != "enemy" else COLORS["RED"]
+                color = (
+                    COLORS["YELLOW"]
+                    if bullet["owner"] != "enemy"
+                    else COLORS["RED"]
+                )
                 pygame.draw.circle(
-                    self.screen, color,
-                    (int(bullet["pos"][0]), int(bullet["pos"][1])), 5)
+                    self.screen,
+                    color,
+                    (int(bullet["pos"][0]), int(bullet["pos"][1])),
+                    5,
+                )
 
     def draw_enemies(self):
-        enemy_list = self.client.game_state[
-            "enemies"] if self.multiplayer_mode else self.enemies
+        enemy_list = (
+            self.client.game_state["enemies"]
+            if self.multiplayer_mode
+            else self.enemies
+        )
 
         for enemy in enemy_list:
             enemy_type = enemy.get("type", "normal")
@@ -1787,8 +1995,13 @@ class Game:
                 color = COLORS["RED"]
 
             size = enemy.get("size", 20)
-            self.draw_tank((enemy["pos"][0], enemy["pos"][1]),
-                           enemy.get("angle", 0), color, False, size)
+            self.draw_tank(
+                (enemy["pos"][0], enemy["pos"][1]),
+                enemy.get("angle", 0),
+                color,
+                False,
+                size,
+            )
 
             max_health = enemy.get("max_health", 30)
             health_pct = enemy["health"] / max_health
@@ -1796,36 +2009,58 @@ class Game:
 
             health_bar_y = enemy["pos"][1] - size - 10
             pygame.draw.rect(
-                self.screen, COLORS["DARK_GRAY"],
-                (enemy["pos"][0] - size, health_bar_y, size * 2, 5))
+                self.screen,
+                COLORS["DARK_GRAY"],
+                (enemy["pos"][0] - size, health_bar_y, size * 2, 5),
+            )
             pygame.draw.rect(
-                self.screen, COLORS["GREEN"],
-                (enemy["pos"][0] - size, health_bar_y, health_width, 5))
+                self.screen,
+                COLORS["GREEN"],
+                (enemy["pos"][0] - size, health_bar_y, health_width, 5),
+            )
 
     def draw_players(self):
         if not self.is_dead:
             has_shield = self.player_shield > 0 or (
                 self.active_effects["shield"]["active"]
-                and time.time() < self.active_effects["shield"]["end_time"])
-            self.draw_tank(self.player_pos, self.player_angle,
-                           self.player_color, has_shield)
+                and time.time() < self.active_effects["shield"]["end_time"]
+            )
+            self.draw_tank(
+                self.player_pos,
+                self.player_angle,
+                self.player_color,
+                has_shield,
+            )
 
         if self.multiplayer_mode:
             color_idx = 0
             for player_id, player_data in self.client.game_state[
-                    "players"].items():
+                "players"
+            ].items():
                 if player_id != self.client.player_id:
                     color = PLAYER_COLORS[color_idx % len(PLAYER_COLORS)]
-                    has_shield = "shield" in player_data and player_data[
-                        "shield"] > 0
-                    self.draw_tank(player_data["pos"], player_data["angle"],
-                                   color, has_shield)
+                    has_shield = (
+                        "shield" in player_data and player_data["shield"] > 0
+                    )
+                    self.draw_tank(
+                        player_data["pos"],
+                        player_data["angle"],
+                        color,
+                        has_shield,
+                    )
 
                     name_text = self.font.render(
                         f"Player {player_id} [Lv.{player_data.get('level', 1)}]",
-                        True, COLORS["BLACK"])
-                    self.screen.blit(name_text, (player_data["pos"][0] - 50,
-                                                 player_data["pos"][1] - 40))
+                        True,
+                        COLORS["BLACK"],
+                    )
+                    self.screen.blit(
+                        name_text,
+                        (
+                            player_data["pos"][0] - 50,
+                            player_data["pos"][1] - 40,
+                        ),
+                    )
 
                     color_idx += 1
 
@@ -1850,33 +2085,46 @@ class Game:
     def draw_ui(self):
         health_text = self.font.render(
             f"Health: {int(self.player_health)}/{self.player_stats['max_health']}",
-            True, COLORS["RED"])
-        shield_text = self.font.render(f"Shield: {int(self.player_shield)}",
-                                       True, COLORS["BLUE"])
+            True,
+            COLORS["RED"],
+        )
+        shield_text = self.font.render(
+            f"Shield: {int(self.player_shield)}", True, COLORS["BLUE"]
+        )
         xp_text = self.font.render(
-            f"XP: {self.player_xp}/{self.xp_to_next_level}", True,
-            COLORS["BLUE"])
-        level_text = self.font.render(f"Level: {self.player_level}", True,
-                                      COLORS["BLACK"])
+            f"XP: {self.player_xp}/{self.xp_to_next_level}",
+            True,
+            COLORS["BLUE"],
+        )
+        level_text = self.font.render(
+            f"Level: {self.player_level}", True, COLORS["BLACK"]
+        )
         points_text = self.font.render(
-            f"Upgrade Points: {self.player_upgrade_points}", True,
-            COLORS["GREEN"])
-        score_text = self.font.render(f"Score: {self.score}", True,
-                                      COLORS["PURPLE"])
-        kills_text = self.font.render(f"Kills: {self.kills}", True,
-                                      COLORS["RED"])
+            f"Upgrade Points: {self.player_upgrade_points}",
+            True,
+            COLORS["GREEN"],
+        )
+        score_text = self.font.render(
+            f"Score: {self.score}", True, COLORS["PURPLE"]
+        )
+        kills_text = self.font.render(
+            f"Kills: {self.kills}", True, COLORS["RED"]
+        )
 
         seconds_played = int(time.time() - self.game_start_time)
         minutes = seconds_played // 60
         seconds = seconds_played % 60
-        time_text = self.font.render(f"Time: {minutes:02d}:{seconds:02d}",
-                                     True, COLORS["BLACK"])
+        time_text = self.font.render(
+            f"Time: {minutes:02d}:{seconds:02d}", True, COLORS["BLACK"]
+        )
 
         panel_height = 180
-        pygame.draw.rect(self.screen, (240, 240, 240, 200),
-                         (0, 0, 220, panel_height))
-        pygame.draw.rect(self.screen, COLORS["DARK_GRAY"],
-                         (0, 0, 220, panel_height), 2)
+        pygame.draw.rect(
+            self.screen, (240, 240, 240, 200), (0, 0, 220, panel_height)
+        )
+        pygame.draw.rect(
+            self.screen, COLORS["DARK_GRAY"], (0, 0, 220, panel_height), 2
+        )
 
         self.screen.blit(health_text, (10, 10))
         self.screen.blit(shield_text, (10, 35))
@@ -1893,7 +2141,9 @@ class Game:
                 remaining = int(effect_data["end_time"] - time.time())
                 effect_text = self.font.render(
                     f"{effect_name.replace('_', ' ').title()}: {remaining}s",
-                    True, COLORS["BLUE"])
+                    True,
+                    COLORS["BLUE"],
+                )
                 self.screen.blit(effect_text, (10, effect_y))
                 effect_y += 25
 
@@ -1903,23 +2153,30 @@ class Game:
 
         pygame.draw.rect(self.screen, COLORS["DARK_GRAY"], (230, 35, 200, 15))
         health_width = int(
-            (self.player_health / self.player_stats["max_health"]) * 200)
-        pygame.draw.rect(self.screen, COLORS["RED"],
-                         (230, 35, health_width, 15))
+            (self.player_health / self.player_stats["max_health"]) * 200
+        )
+        pygame.draw.rect(
+            self.screen, COLORS["RED"], (230, 35, health_width, 15)
+        )
 
         if self.player_shield > 0:
-            pygame.draw.rect(self.screen, COLORS["DARK_GRAY"],
-                             (230, 60, 200, 10))
+            pygame.draw.rect(
+                self.screen, COLORS["DARK_GRAY"], (230, 60, 200, 10)
+            )
             shield_width = int((self.player_shield / 30) * 200)
-            pygame.draw.rect(self.screen, (100, 150, 255),
-                             (230, 60, shield_width, 10))
+            pygame.draw.rect(
+                self.screen, (100, 150, 255), (230, 60, shield_width, 10)
+            )
 
         if self.multiplayer_mode:
             players_text = self.font.render(
-                f"Players: {len(self.client.game_state['players'])}", True,
-                COLORS["BLACK"])
-            ping_text = self.font.render(f"Ping: {self.client.ping} ms", True,
-                                         COLORS["BLACK"])
+                f"Players: {len(self.client.game_state['players'])}",
+                True,
+                COLORS["BLACK"],
+            )
+            ping_text = self.font.render(
+                f"Ping: {self.client.ping} ms", True, COLORS["BLACK"]
+            )
             self.screen.blit(players_text, (WIDTH - 120, 35))
             self.screen.blit(ping_text, (WIDTH - 120, 60))
 
@@ -1935,13 +2192,22 @@ class Game:
             if elapsed >= self.update_interval:
                 self.last_update_time = current_time
 
-            avg_frame_time = sum(self.frame_times) / len(
-                self.frame_times) if self.frame_times else 0
+            avg_frame_time = (
+                sum(self.frame_times) / len(self.frame_times)
+                if self.frame_times
+                else 0
+            )
             fps = 0 if avg_frame_time == 0 else 1000 / avg_frame_time
 
             fps_text = self.font.render(
-                f"FPS: {int(fps)}", True, COLORS["GREEN"] if fps >= 55 else
-                COLORS["YELLOW"] if fps >= 30 else COLORS["RED"])
+                f"FPS: {int(fps)}",
+                True,
+                (
+                    COLORS["GREEN"]
+                    if fps >= 55
+                    else COLORS["YELLOW"] if fps >= 30 else COLORS["RED"]
+                ),
+            )
             self.screen.blit(fps_text, (WIDTH - 100, HEIGHT - 30))
 
         mouse_pos = pygame.mouse.get_pos()
@@ -1960,26 +2226,34 @@ class Game:
         overlay.fill((0, 0, 0, 128))
         self.screen.blit(overlay, (0, 0))
 
-        pygame.draw.rect(self.screen,
-                         COLORS["WHITE"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=15)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=15)
+        pygame.draw.rect(
+            self.screen,
+            COLORS["WHITE"],
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=15,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=15,
+        )
 
         title = self.title_font.render("Upgrade Stats", True, COLORS["BLACK"])
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 40))
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 40)
+        )
         self.screen.blit(title, title_rect)
 
         points_text = self.subtitle_font.render(
-            f"Upgrade Points: {self.player_upgrade_points}", True,
-            COLORS["GREEN"])
-        points_rect = points_text.get_rect(center=(menu_x + menu_width // 2,
-                                                   menu_y + 80))
+            f"Upgrade Points: {self.player_upgrade_points}",
+            True,
+            COLORS["GREEN"],
+        )
+        points_rect = points_text.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 80)
+        )
         self.screen.blit(points_text, points_rect)
 
         y_offset = 130
@@ -2001,53 +2275,61 @@ class Game:
 
             stat_level = self.get_stat_level(stat_key)
             for i in range(MAX_STAT_LEVEL):
-                rect = pygame.Rect(menu_x + 220 + i * 20, menu_y + y_offset,
-                                   15, 20)
+                rect = pygame.Rect(
+                    menu_x + 220 + i * 20, menu_y + y_offset, 15, 20
+                )
                 color = COLORS["BLUE"] if i < stat_level else COLORS["GRAY"]
                 pygame.draw.rect(self.screen, color, rect, border_radius=3)
-                pygame.draw.rect(self.screen,
-                                 COLORS["BLACK"],
-                                 rect,
-                                 1,
-                                 border_radius=3)
+                pygame.draw.rect(
+                    self.screen, COLORS["BLACK"], rect, 1, border_radius=3
+                )
 
-            upgrade_button = pygame.Rect(menu_x + menu_width - 90,
-                                         menu_y + y_offset - 5, button_width,
-                                         button_height)
-            color = COLORS[
-                "GREEN"] if self.player_upgrade_points > 0 and stat_level < MAX_STAT_LEVEL else COLORS[
-                    "GRAY"]
-            pygame.draw.rect(self.screen,
-                             color,
-                             upgrade_button,
-                             border_radius=5)
-            pygame.draw.rect(self.screen,
-                             COLORS["BLACK"],
-                             upgrade_button,
-                             2,
-                             border_radius=5)
+            upgrade_button = pygame.Rect(
+                menu_x + menu_width - 90,
+                menu_y + y_offset - 5,
+                button_width,
+                button_height,
+            )
+            color = (
+                COLORS["GREEN"]
+                if self.player_upgrade_points > 0
+                and stat_level < MAX_STAT_LEVEL
+                else COLORS["GRAY"]
+            )
+            pygame.draw.rect(
+                self.screen, color, upgrade_button, border_radius=5
+            )
+            pygame.draw.rect(
+                self.screen,
+                COLORS["BLACK"],
+                upgrade_button,
+                2,
+                border_radius=5,
+            )
 
             plus_text = self.font.render("+", True, COLORS["BLACK"])
             plus_rect = plus_text.get_rect(center=upgrade_button.center)
             self.screen.blit(plus_text, plus_rect)
 
-            value_text = self.font.render(f"{self.player_stats[stat_key]}",
-                                          True, COLORS["BLACK"])
+            value_text = self.font.render(
+                f"{self.player_stats[stat_key]}", True, COLORS["BLACK"]
+            )
             self.screen.blit(value_text, (menu_x + 390, menu_y + y_offset))
 
             y_offset += 60
 
-        close_button = pygame.Rect(menu_x + (menu_width - 200) // 2,
-                                   menu_y + menu_height - 80, 200, 50)
-        pygame.draw.rect(self.screen,
-                         COLORS["GRAY"],
-                         close_button,
-                         border_radius=10)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         close_button,
-                         2,
-                         border_radius=10)
+        close_button = pygame.Rect(
+            menu_x + (menu_width - 200) // 2,
+            menu_y + menu_height - 80,
+            200,
+            50,
+        )
+        pygame.draw.rect(
+            self.screen, COLORS["GRAY"], close_button, border_radius=10
+        )
+        pygame.draw.rect(
+            self.screen, COLORS["BLACK"], close_button, 2, border_radius=10
+        )
 
         close_text = self.font.render("Close [U]", True, COLORS["BLACK"])
         close_rect = close_text.get_rect(center=close_button.center)
@@ -2064,37 +2346,46 @@ class Game:
         menu_width, menu_height = 500, 600
         menu_x, menu_y = (WIDTH - menu_width) // 2, (HEIGHT - menu_height) // 2
 
-        pygame.draw.rect(self.screen,
-                         COLORS["WHITE"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=15)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=15)
+        pygame.draw.rect(
+            self.screen,
+            COLORS["WHITE"],
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=15,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=15,
+        )
 
         title = self.title_font.render("Settings", True, COLORS["BLACK"])
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 40))
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 40)
+        )
         self.screen.blit(title, title_rect)
 
         sliders_header = self.font.render("Controls", True, COLORS["BLACK"])
         buttons_header = self.font.render("Options", True, COLORS["BLACK"])
 
-        sliders_header_rect = sliders_header.get_rect(center=(menu_x +
-                                                              menu_width // 4,
-                                                              menu_y + 80))
+        sliders_header_rect = sliders_header.get_rect(
+            center=(menu_x + menu_width // 4, menu_y + 80)
+        )
         buttons_header_rect = buttons_header.get_rect(
-            center=(menu_x + menu_width * 3 // 4, menu_y + 80))
+            center=(menu_x + menu_width * 3 // 4, menu_y + 80)
+        )
 
         self.screen.blit(sliders_header, sliders_header_rect)
         self.screen.blit(buttons_header, buttons_header_rect)
 
         pygame.draw.line(
-            self.screen, COLORS["GRAY"],
+            self.screen,
+            COLORS["GRAY"],
             (menu_x + menu_width // 2, menu_y + 100),
-            (menu_x + menu_width // 2, menu_y + menu_height - 100), 2)
+            (menu_x + menu_width // 2, menu_y + menu_height - 100),
+            2,
+        )
 
         mouse_pos = pygame.mouse.get_pos()
         mouse_pressed = pygame.mouse.get_pressed()
@@ -2103,12 +2394,15 @@ class Game:
             slider.value = slider.update(mouse_pos, mouse_pressed)
             slider.draw(self.screen)
 
-        self.settings_buttons[
-            "fullscreen"].text = f"Fullscreen: {'ON' if self.fullscreen else 'OFF'}"
-        self.settings_buttons[
-            "particles"].text = f"Particle Effects: {'ON' if self.particle_effects else 'OFF'}"
-        self.settings_buttons[
-            "fps"].text = f"FPS Display: {'ON' if self.fps_display else 'OFF'}"
+        self.settings_buttons["fullscreen"].text = (
+            f"Fullscreen: {'ON' if self.fullscreen else 'OFF'}"
+        )
+        self.settings_buttons["particles"].text = (
+            f"Particle Effects: {'ON' if self.particle_effects else 'OFF'}"
+        )
+        self.settings_buttons["fps"].text = (
+            f"FPS Display: {'ON' if self.fps_display else 'OFF'}"
+        )
 
         for button in self.settings_buttons.values():
             button.update(mouse_pos)
@@ -2122,26 +2416,34 @@ class Game:
         menu_width, menu_height = 500, 300
         menu_x, menu_y = (WIDTH - menu_width) // 2, (HEIGHT - menu_height) // 2
 
-        pygame.draw.rect(self.screen,
-                         COLORS["WHITE"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=15)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=15)
+        pygame.draw.rect(
+            self.screen,
+            COLORS["WHITE"],
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=15,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=15,
+        )
 
         title = self.title_font.render("Host Game", True, COLORS["BLACK"])
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 40))
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 40)
+        )
         self.screen.blit(title, title_rect)
 
         info_text = self.font.render(
-            f"Server will start on localhost:{self.host_port}", True,
-            COLORS["BLACK"])
-        info_rect = info_text.get_rect(center=(menu_x + menu_width // 2,
-                                               menu_y + 100))
+            f"Server will start on localhost:{self.host_port}",
+            True,
+            COLORS["BLACK"],
+        )
+        info_rect = info_text.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 100)
+        )
         self.screen.blit(info_text, info_rect)
 
         mouse_pos = pygame.mouse.get_pos()
@@ -2155,9 +2457,11 @@ class Game:
             original_color = button.color
             if name == self.difficulty:
                 r, g, b = original_color
-                button.color = (min(255, r + color_boost),
-                                min(255, g + color_boost),
-                                min(255, b + color_boost))
+                button.color = (
+                    min(255, r + color_boost),
+                    min(255, g + color_boost),
+                    min(255, b + color_boost),
+                )
 
             button.update(mouse_pos)
             button.draw(self.screen)
@@ -2176,32 +2480,42 @@ class Game:
         menu_width, menu_height = 500, 300
         menu_x, menu_y = (WIDTH - menu_width) // 2, (HEIGHT - menu_height) // 2
 
-        pygame.draw.rect(self.screen,
-                         COLORS["WHITE"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=15)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=15)
+        pygame.draw.rect(
+            self.screen,
+            COLORS["WHITE"],
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=15,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=15,
+        )
 
         title = self.title_font.render("Join Game", True, COLORS["BLACK"])
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 40))
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 40)
+        )
         self.screen.blit(title, title_rect)
 
         info_text = self.font.render(
-            f"Connect to: {self.join_ip}:{self.join_port}", True,
-            COLORS["BLACK"])
-        info_rect = info_text.get_rect(center=(menu_x + menu_width // 2,
-                                               menu_y + 100))
+            f"Connect to: {self.join_ip}:{self.join_port}",
+            True,
+            COLORS["BLACK"],
+        )
+        info_rect = info_text.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 100)
+        )
         self.screen.blit(info_text, info_rect)
 
-        note_text = self.font.render("(Edit server.py to change IP/port)",
-                                     True, COLORS["DARK_GRAY"])
-        note_rect = note_text.get_rect(center=(menu_x + menu_width // 2,
-                                               menu_y + 130))
+        note_text = self.font.render(
+            "(Edit server.py to change IP/port)", True, COLORS["DARK_GRAY"]
+        )
+        note_rect = note_text.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 130)
+        )
         self.screen.blit(note_text, note_rect)
 
         mouse_pos = pygame.mouse.get_pos()
@@ -2214,18 +2528,22 @@ class Game:
 
         current_time = time.time()
         for i in range(20):
-            x = (WIDTH //
-                 2) + math.cos(current_time * 0.5 + i * 0.5) * (WIDTH // 3)
-            y = (HEIGHT //
-                 2) + math.sin(current_time * 0.5 + i * 0.7) * (HEIGHT // 3)
+            x = (WIDTH // 2) + math.cos(current_time * 0.5 + i * 0.5) * (
+                WIDTH // 3
+            )
+            y = (HEIGHT // 2) + math.sin(current_time * 0.5 + i * 0.7) * (
+                HEIGHT // 3
+            )
             size = 20 + 10 * math.sin(current_time + i)
             alpha = int(128 + 64 * math.sin(current_time * 0.3 + i * 0.2))
 
-            circle_surf = pygame.Surface((int(size * 2), int(size * 2)),
-                                         pygame.SRCALPHA)
+            circle_surf = pygame.Surface(
+                (int(size * 2), int(size * 2)), pygame.SRCALPHA
+            )
             color = (*PLAYER_COLORS[i % len(PLAYER_COLORS)][:3], alpha)
-            pygame.draw.circle(circle_surf, color, (int(size), int(size)),
-                               int(size))
+            pygame.draw.circle(
+                circle_surf, color, (int(size), int(size)), int(size)
+            )
             self.screen.blit(circle_surf, (int(x - size), int(y - size)))
 
         menu_width = 450
@@ -2233,23 +2551,31 @@ class Game:
         menu_x = (WIDTH - menu_width) // 2
         menu_y = (HEIGHT - menu_height) // 2
 
-        pygame.draw.rect(self.screen, (255, 255, 255, 230),
-                         (menu_x, menu_y, menu_width, menu_height),
-                         border_radius=20)
-        pygame.draw.rect(self.screen,
-                         COLORS["BLACK"],
-                         (menu_x, menu_y, menu_width, menu_height),
-                         3,
-                         border_radius=20)
+        pygame.draw.rect(
+            self.screen,
+            (255, 255, 255, 230),
+            (menu_x, menu_y, menu_width, menu_height),
+            border_radius=20,
+        )
+        pygame.draw.rect(
+            self.screen,
+            COLORS["BLACK"],
+            (menu_x, menu_y, menu_width, menu_height),
+            3,
+            border_radius=20,
+        )
 
         title = self.title_font.render("BULLETVERSE.IO", True, COLORS["BLUE"])
-        subtitle = self.font.render("Multiplayer Tank Battle", True,
-                                    COLORS["BLACK"])
+        subtitle = self.font.render(
+            "Multiplayer Tank Battle", True, COLORS["BLACK"]
+        )
 
-        title_rect = title.get_rect(center=(menu_x + menu_width // 2,
-                                            menu_y + 60))
-        subtitle_rect = subtitle.get_rect(center=(menu_x + menu_width // 2,
-                                                  menu_y + 90))
+        title_rect = title.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 60)
+        )
+        subtitle_rect = subtitle.get_rect(
+            center=(menu_x + menu_width // 2, menu_y + 90)
+        )
 
         self.screen.blit(title, title_rect)
         self.screen.blit(subtitle, subtitle_rect)
@@ -2259,8 +2585,9 @@ class Game:
             button.update(mouse_pos)
             button.draw(self.screen)
 
-        version_text = self.font.render("Version 2.0", True,
-                                        COLORS["DARK_GRAY"])
+        version_text = self.font.render(
+            "Version 2.0", True, COLORS["DARK_GRAY"]
+        )
         self.screen.blit(version_text, (WIDTH - 120, HEIGHT - 30))
 
         if self.show_cosmetics_menu:
@@ -2277,13 +2604,16 @@ class Game:
 
         remaining = max(0, int(self.respawn_time - time.time()))
         respawn_text = self.subtitle_font.render(
-            f"Respawning in {remaining}...", True, COLORS["WHITE"])
+            f"Respawning in {remaining}...", True, COLORS["WHITE"]
+        )
         respawn_rect = respawn_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         self.screen.blit(respawn_text, respawn_rect)
 
         stats_text = self.font.render(
             f"Score: {self.score}   Kills: {self.kills}   Level: {self.player_level}",
-            True, COLORS["WHITE"])
+            True,
+            COLORS["WHITE"],
+        )
         stats_rect = stats_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 50))
         self.screen.blit(stats_text, stats_rect)
 
@@ -2337,25 +2667,34 @@ class Game:
 
         y_offset = 130
         for _, stat_key, increment in stats_info:
-            upgrade_button = pygame.Rect(menu_x + menu_width - 90,
-                                         menu_y + y_offset - 5, button_width,
-                                         button_height)
+            upgrade_button = pygame.Rect(
+                menu_x + menu_width - 90,
+                menu_y + y_offset - 5,
+                button_width,
+                button_height,
+            )
             stat_level = self.get_stat_level(stat_key)
 
-            if upgrade_button.collidepoint(
-                    pos) and stat_level < MAX_STAT_LEVEL:
+            if (
+                upgrade_button.collidepoint(pos)
+                and stat_level < MAX_STAT_LEVEL
+            ):
                 self.player_stats[stat_key] += increment
                 self.player_upgrade_points -= 1
-                self.play_sound('button')
+                self.play_sound("button")
                 break
 
             y_offset += 60
 
-        close_button = pygame.Rect(menu_x + (menu_width - 200) // 2,
-                                   menu_y + menu_height - 80, 200, 50)
+        close_button = pygame.Rect(
+            menu_x + (menu_width - 200) // 2,
+            menu_y + menu_height - 80,
+            200,
+            50,
+        )
         if close_button.collidepoint(pos):
             self.show_upgrade_menu = False
-            self.play_sound('button')
+            self.play_sound("button")
 
     def handle_settings_click(self, pos, event):
 
@@ -2363,28 +2702,28 @@ class Game:
             if self.settings_buttons["fullscreen"].is_clicked(event):
                 self.fullscreen = not self.fullscreen
                 self.apply_display_mode()
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             elif self.settings_buttons["particles"].is_clicked(event):
                 self.particle_effects = not self.particle_effects
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             elif self.settings_buttons["music"].is_clicked(event):
                 self.toggle_music()
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             elif self.settings_buttons["fps"].is_clicked(event):
                 self.fps_display = not self.fps_display
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             elif self.settings_buttons["back"].is_clicked(event):
                 self.show_settings_menu = False
                 self.save_settings()
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
         return False
@@ -2398,8 +2737,9 @@ class Game:
         if self.fullscreen:
             info = pygame.display.Info()
             WIDTH, HEIGHT = info.current_w, info.current_h
-            self.screen = pygame.display.set_mode((WIDTH, HEIGHT),
-                                                  pygame.FULLSCREEN)
+            self.screen = pygame.display.set_mode(
+                (WIDTH, HEIGHT), pygame.FULLSCREEN
+            )
         else:
             WIDTH, HEIGHT = 1280, 720
             self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -2432,37 +2772,41 @@ class Game:
                 self.save_settings()
                 return True
 
-        if self.current_screen == "main_menu" and not self.show_settings_menu and not self.show_cosmetics_menu:
+        if (
+            self.current_screen == "main_menu"
+            and not self.show_settings_menu
+            and not self.show_cosmetics_menu
+        ):
             if self.menu_buttons["singleplayer"].is_clicked(event):
                 self.current_screen = "game"
                 self.multiplayer_mode = False
                 self.reset_game()
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             if self.menu_buttons["host"].is_clicked(event):
                 self.current_screen = "host"
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             if self.menu_buttons["join"].is_clicked(event):
                 self.current_screen = "join"
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             if self.menu_buttons["cosmetics"].is_clicked(event):
                 self.show_cosmetics_menu = True
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             if self.menu_buttons["settings"].is_clicked(event):
                 self.show_settings_menu = True
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
             if self.menu_buttons["quit"].is_clicked(event):
                 self.running = False
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
         if self.show_settings_menu:
@@ -2472,7 +2816,7 @@ class Game:
             for name, button in self.difficulty_buttons.items():
                 if button.is_clicked(event):
                     self.difficulty = name
-                    self.play_sound('button')
+                    self.play_sound("button")
                     return True
 
             if self.host_buttons["start"].is_clicked(event):
@@ -2487,7 +2831,7 @@ class Game:
                         self.multiplayer_mode = True
                         self.is_host = True
                         self.reset_game()
-                        self.play_sound('button')
+                        self.play_sound("button")
                         return True
                 else:
                     self.server = None
@@ -2495,7 +2839,7 @@ class Game:
 
             if self.host_buttons["back"].is_clicked(event):
                 self.current_screen = "main_menu"
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
         if self.show_cosmetics_menu:
@@ -2504,13 +2848,13 @@ class Game:
                     if button.is_clicked(event):
                         self.player_color_name = color_name
                         self.player_color = self.available_colors[color_name]
-                        self.play_sound('button')
+                        self.play_sound("button")
                         return True
 
                 if self.cosmetics_back_button.is_clicked(event):
                     self.show_cosmetics_menu = False
                     self.save_settings()
-                    self.play_sound('button')
+                    self.play_sound("button")
                     return True
 
         if self.current_screen == "join":
@@ -2520,13 +2864,13 @@ class Game:
                     self.multiplayer_mode = True
                     self.is_host = False
                     self.reset_game()
-                    self.play_sound('button')
+                    self.play_sound("button")
                     return True
                 return False
 
             if self.join_buttons["back"].is_clicked(event):
                 self.current_screen = "main_menu"
-                self.play_sound('button')
+                self.play_sound("button")
                 return True
 
         return False
@@ -2550,7 +2894,7 @@ class Game:
 
             elif event.key == pygame.K_u:
                 self.show_upgrade_menu = not self.show_upgrade_menu
-                self.play_sound('button')
+                self.play_sound("button")
 
             elif event.key == pygame.K_m:
                 self.toggle_music()
@@ -2560,7 +2904,7 @@ class Game:
 
             if self.game_buttons["upgrade"].rect.collidepoint(mouse_pos):
                 self.show_upgrade_menu = not self.show_upgrade_menu
-                self.play_sound('button')
+                self.play_sound("button")
                 return
 
             if self.game_buttons["menu"].rect.collidepoint(mouse_pos):
@@ -2579,28 +2923,38 @@ class Game:
             if self.show_upgrade_menu:
                 self.handle_upgrade_click(mouse_pos)
             elif not self.is_dead and self.reload_timer <= 0:
-                angle = math.atan2(mouse_pos[1] - self.player_pos[1],
-                                   mouse_pos[0] - self.player_pos[0])
+                angle = math.atan2(
+                    mouse_pos[1] - self.player_pos[1],
+                    mouse_pos[0] - self.player_pos[0],
+                )
 
                 damage = self.player_stats["bullet_damage"]
-                if self.active_effects["damage_boost"]["active"] and time.time(
-                ) < self.active_effects["damage_boost"]["end_time"]:
+                if (
+                    self.active_effects["damage_boost"]["active"]
+                    and time.time()
+                    < self.active_effects["damage_boost"]["end_time"]
+                ):
                     damage += 5
 
                 bullet = [
                     self.player_pos[0] + 25 * math.cos(angle),
-                    self.player_pos[1] + 25 * math.sin(angle), angle,
-                    self.player_stats["bullet_penetration"], damage
+                    self.player_pos[1] + 25 * math.sin(angle),
+                    angle,
+                    self.player_stats["bullet_penetration"],
+                    damage,
                 ]
                 self.bullets.append(bullet)
 
-                self.play_sound('shoot')
+                self.play_sound("shoot")
 
                 if self.particle_effects:
-                    bullet_pos = (self.player_pos[0] + 25 * math.cos(angle),
-                                  self.player_pos[1] + 25 * math.sin(angle))
-                    self.particles.add_particles(bullet_pos, COLORS["BLUE"], 5,
-                                                 1.0, 20)
+                    bullet_pos = (
+                        self.player_pos[0] + 25 * math.cos(angle),
+                        self.player_pos[1] + 25 * math.sin(angle),
+                    )
+                    self.particles.add_particles(
+                        bullet_pos, COLORS["BLUE"], 5, 1.0, 20
+                    )
 
                 if self.multiplayer_mode:
                     self.new_bullets.append(bullet)
@@ -2614,8 +2968,10 @@ class Game:
         keys = pygame.key.get_pressed()
         speed = self.player_stats["movement_speed"]
 
-        if self.active_effects["speed_boost"]["active"] and time.time(
-        ) < self.active_effects["speed_boost"]["end_time"]:
+        if (
+            self.active_effects["speed_boost"]["active"]
+            and time.time() < self.active_effects["speed_boost"]["end_time"]
+        ):
             speed *= 1.5
 
         dx, dy = 0, 0
@@ -2639,51 +2995,59 @@ class Game:
         self.player_pos[1] = max(20, min(HEIGHT - 20, self.player_pos[1]))
 
         mouse_pos = pygame.mouse.get_pos()
-        target_angle = math.atan2(mouse_pos[1] - self.player_pos[1],
-                                  mouse_pos[0] - self.player_pos[0])
+        target_angle = math.atan2(
+            mouse_pos[1] - self.player_pos[1],
+            mouse_pos[0] - self.player_pos[0],
+        )
 
-        angle_diff = (target_angle - self.player_angle +
-                      math.pi) % (2 * math.pi) - math.pi
-        self.player_angle += angle_diff * min(1.0,
-                                              0.2 * self.mouse_sensitivity * 2)
+        angle_diff = (target_angle - self.player_angle + math.pi) % (
+            2 * math.pi
+        ) - math.pi
+        self.player_angle += angle_diff * min(
+            1.0, 0.2 * self.mouse_sensitivity * 2
+        )
 
         self.player_angle = (self.player_angle + 2 * math.pi) % (2 * math.pi)
 
     def update_active_effects(self):
         current_time = time.time()
 
-        if self.active_effects["shield"][
-                "active"] and current_time >= self.active_effects["shield"][
-                    "end_time"]:
+        if (
+            self.active_effects["shield"]["active"]
+            and current_time >= self.active_effects["shield"]["end_time"]
+        ):
             self.active_effects["shield"]["active"] = False
             self.player_shield = 0
 
-        if self.active_effects["speed_boost"][
-                "active"] and current_time >= self.active_effects[
-                    "speed_boost"]["end_time"]:
+        if (
+            self.active_effects["speed_boost"]["active"]
+            and current_time >= self.active_effects["speed_boost"]["end_time"]
+        ):
             self.active_effects["speed_boost"]["active"] = False
 
-        if self.active_effects["damage_boost"][
-                "active"] and current_time >= self.active_effects[
-                    "damage_boost"]["end_time"]:
+        if (
+            self.active_effects["damage_boost"]["active"]
+            and current_time >= self.active_effects["damage_boost"]["end_time"]
+        ):
             self.active_effects["damage_boost"]["active"] = False
 
     def update_discord_rpc(self):
         if self.rpc:
             try:
-                mode = "Multiplayer" if self.multiplayer_mode else "Singleplayer"
+                mode = (
+                    "Multiplayer" if self.multiplayer_mode else "Singleplayer"
+                )
                 difficulty = self.difficulty.capitalize()
 
                 self.rpc.update(
-                    details=
-                    f"{mode} ({difficulty}) | Level: {self.player_level}",
+                    details=f"{mode} ({difficulty}) | Level: {self.player_level}",
                     state=f"Score: {self.score} | Kills: {self.kills}",
                     large_image="https://i.imgur.com/vn4pYBH.png",
                     large_text="Bulletverse.io",
-                    small_image=
-                    "https://th.bing.com/th/id/R.da61fa152c102c46c16786b9f79402f8?rik=l5kvYddcePaDtw&pid=ImgRaw&r=0",
+                    small_image="https://th.bing.com/th/id/R.da61fa152c102c46c16786b9f79402f8?rik=l5kvYddcePaDtw&pid=ImgRaw&r=0",
                     small_text="https://discord.gg/XVN6mYv5AJ",
-                    start=int(time.time()))
+                    start=int(time.time()),
+                )
             except:
                 pass
 
@@ -2701,7 +3065,7 @@ class Game:
             "xp_to_next_level": self.xp_to_next_level,
             "new_bullets": self.new_bullets,
             "upgrade_points": self.player_upgrade_points,
-            "send_time": time.time()
+            "send_time": time.time(),
         }
 
         self.client.send_data(player_data)
@@ -2710,20 +3074,27 @@ class Game:
 
         if "powerups" in self.client.game_state:
             for powerup in self.client.game_state["powerups"]:
-                if math.hypot(powerup["pos"][0] - self.player_pos[0],
-                              powerup["pos"][1] - self.player_pos[1]) < 25:
+                if (
+                    math.hypot(
+                        powerup["pos"][0] - self.player_pos[0],
+                        powerup["pos"][1] - self.player_pos[1],
+                    )
+                    < 25
+                ):
                     self.apply_powerup(powerup["type"])
 
     def apply_powerup(self, powerup_type):
-        self.play_sound('powerup')
+        self.play_sound("powerup")
 
         if self.particle_effects:
-            self.particles.add_particles(self.player_pos, COLORS["PURPLE"], 15,
-                                         2.0, 40)
+            self.particles.add_particles(
+                self.player_pos, COLORS["PURPLE"], 15, 2.0, 40
+            )
 
         if powerup_type == "health":
-            self.player_health = min(self.player_health + 25,
-                                     self.player_stats["max_health"])
+            self.player_health = min(
+                self.player_health + 25, self.player_stats["max_health"]
+            )
         elif powerup_type == "shield":
             self.player_shield = 30
             self.active_effects["shield"]["active"] = True
@@ -2746,19 +3117,22 @@ class Game:
             self.player_xp -= self.xp_to_next_level
             self.xp_to_next_level = int(self.xp_to_next_level * 1.5)
 
-            self.play_sound('level_up')
+            self.play_sound("level_up")
 
             if self.particle_effects:
-                self.particles.add_particles(self.player_pos, COLORS["YELLOW"],
-                                             20, 3.0, 60)
+                self.particles.add_particles(
+                    self.player_pos, COLORS["YELLOW"], 20, 3.0, 60
+                )
 
     def update_singleplayer(self):
         current_time = time.time()
 
         if current_time - self.last_powerup_time > random.uniform(15, 30):
             if len(self.powerups) < 5:
-                pos = (random.randint(50, WIDTH - 50),
-                       random.randint(50, HEIGHT - 50))
+                pos = (
+                    random.randint(50, WIDTH - 50),
+                    random.randint(50, HEIGHT - 50),
+                )
 
                 types = ["health", "shield", "speed", "damage", "xp"]
                 weights = [0.25, 0.2, 0.2, 0.2, 0.15]
@@ -2770,8 +3144,13 @@ class Game:
         for powerup in list(self.powerups):
             powerup.update()
 
-            if math.hypot(powerup.pos[0] - self.player_pos[0],
-                          powerup.pos[1] - self.player_pos[1]) < 25:
+            if (
+                math.hypot(
+                    powerup.pos[0] - self.player_pos[0],
+                    powerup.pos[1] - self.player_pos[1],
+                )
+                < 25
+            ):
                 self.apply_powerup(powerup.type)
 
                 self.powerups.remove(powerup)
@@ -2798,63 +3177,82 @@ class Game:
                 enemy["angle"] += random.uniform(-0.5, 0.5)
 
             if random.random() < 0.05:
-                target_angle = math.atan2(self.player_pos[1] - enemy["pos"][1],
-                                          self.player_pos[0] - enemy["pos"][0])
+                target_angle = math.atan2(
+                    self.player_pos[1] - enemy["pos"][1],
+                    self.player_pos[0] - enemy["pos"][0],
+                )
 
-                angle_diff = (target_angle - enemy["angle"] +
-                              math.pi) % (2 * math.pi) - math.pi
+                angle_diff = (target_angle - enemy["angle"] + math.pi) % (
+                    2 * math.pi
+                ) - math.pi
                 enemy["angle"] += angle_diff * 0.1
 
             enemy["fire_timer"] -= 1
             if enemy["fire_timer"] <= 0:
                 enemy["fire_timer"] = ENEMY_FIRE_RATE * random.uniform(
-                    0.8, 1.2)
+                    0.8, 1.2
+                )
 
-                dist = math.hypot(self.player_pos[0] - enemy["pos"][0],
-                                  self.player_pos[1] - enemy["pos"][1])
+                dist = math.hypot(
+                    self.player_pos[0] - enemy["pos"][0],
+                    self.player_pos[1] - enemy["pos"][1],
+                )
 
                 if dist < 400:
                     angle_to_player = math.atan2(
                         self.player_pos[1] - enemy["pos"][1],
-                        self.player_pos[0] - enemy["pos"][0])
+                        self.player_pos[0] - enemy["pos"][0],
+                    )
 
                     inaccuracy = min(0.2, dist / 2000)
                     angle_to_player += random.uniform(-inaccuracy, inaccuracy)
 
                     self.enemy_bullets.append(
-                        [enemy["pos"][0], enemy["pos"][1], angle_to_player])
+                        [enemy["pos"][0], enemy["pos"][1], angle_to_player]
+                    )
 
                     if self.particle_effects:
                         bullet_pos = (enemy["pos"][0], enemy["pos"][1])
-                        self.particles.add_particles(bullet_pos, COLORS["RED"],
-                                                     3, 1.0, 10)
+                        self.particles.add_particles(
+                            bullet_pos, COLORS["RED"], 3, 1.0, 10
+                        )
 
     def move_bullets(self):
         for bullet in list(self.bullets):
             bullet[0] += self.player_stats["bullet_speed"] * math.cos(
-                bullet[2])
+                bullet[2]
+            )
             bullet[1] += self.player_stats["bullet_speed"] * math.sin(
-                bullet[2])
+                bullet[2]
+            )
 
-            if bullet[0] < 0 or bullet[0] > WIDTH or bullet[1] < 0 or bullet[
-                    1] > HEIGHT:
+            if (
+                bullet[0] < 0
+                or bullet[0] > WIDTH
+                or bullet[1] < 0
+                or bullet[1] > HEIGHT
+            ):
                 self.bullets.remove(bullet)
                 continue
 
             for enemy in list(self.enemies):
-                if math.hypot(bullet[0] - enemy["pos"][0],
-                              bullet[1] - enemy["pos"][1]) < enemy.get(
-                                  "size", 20):
-                    damage = bullet[4] if len(
-                        bullet) > 4 else self.player_stats["bullet_damage"]
+                if math.hypot(
+                    bullet[0] - enemy["pos"][0], bullet[1] - enemy["pos"][1]
+                ) < enemy.get("size", 20):
+                    damage = (
+                        bullet[4]
+                        if len(bullet) > 4
+                        else self.player_stats["bullet_damage"]
+                    )
                     enemy["health"] -= damage
 
-                    self.play_sound('hit')
+                    self.play_sound("hit")
 
                     if self.particle_effects:
                         hit_pos = (bullet[0], bullet[1])
-                        self.particles.add_particles(hit_pos, COLORS["RED"], 8,
-                                                     1.5, 20)
+                        self.particles.add_particles(
+                            hit_pos, COLORS["RED"], 8, 1.5, 20
+                        )
 
                     bullet[3] -= 1
 
@@ -2867,29 +3265,40 @@ class Game:
                         self.kills += 1
 
                         xp_gain = 10
-                        if hasattr(
-                                self, 'difficulty'
-                        ) and self.difficulty in DIFFICULTY_SETTINGS:
-                            xp_gain *= DIFFICULTY_SETTINGS[
-                                self.difficulty]["xp_multiplier"]
+                        if (
+                            hasattr(self, "difficulty")
+                            and self.difficulty in DIFFICULTY_SETTINGS
+                        ):
+                            xp_gain *= DIFFICULTY_SETTINGS[self.difficulty][
+                                "xp_multiplier"
+                            ]
                         self.add_xp(xp_gain)
 
                         if random.random() < 0.1:
                             powerup_type = random.choice(
-                                ["health", "shield", "speed", "damage", "xp"])
+                                ["health", "shield", "speed", "damage", "xp"]
+                            )
                             self.powerups.append(
-                                PowerUp((enemy["pos"][0], enemy["pos"][1]),
-                                        powerup_type))
+                                PowerUp(
+                                    (enemy["pos"][0], enemy["pos"][1]),
+                                    powerup_type,
+                                )
+                            )
 
                         if self.particle_effects:
                             explosion_pos = (enemy["pos"][0], enemy["pos"][1])
                             self.particles.add_particles(
-                                explosion_pos, COLORS["RED"], 20, 2.5, 40)
+                                explosion_pos, COLORS["RED"], 20, 2.5, 40
+                            )
 
                         self.enemies.remove(enemy)
                         self.enemies.append(
-                            spawn_enemy(self.difficulty if hasattr(
-                                self, 'difficulty') else "normal"))
+                            spawn_enemy(
+                                self.difficulty
+                                if hasattr(self, "difficulty")
+                                else "normal"
+                            )
+                        )
 
                     break
 
@@ -2897,21 +3306,33 @@ class Game:
             bullet[0] += ENEMY_BULLET_SPEED * math.cos(bullet[2])
             bullet[1] += ENEMY_BULLET_SPEED * math.sin(bullet[2])
 
-            if bullet[0] < 0 or bullet[0] > WIDTH or bullet[1] < 0 or bullet[
-                    1] > HEIGHT:
+            if (
+                bullet[0] < 0
+                or bullet[0] > WIDTH
+                or bullet[1] < 0
+                or bullet[1] > HEIGHT
+            ):
                 self.enemy_bullets.remove(bullet)
                 continue
 
-            if not self.is_dead and math.hypot(
+            if (
+                not self.is_dead
+                and math.hypot(
                     bullet[0] - self.player_pos[0],
-                    bullet[1] - self.player_pos[1]) < 20:
+                    bullet[1] - self.player_pos[1],
+                )
+                < 20
+            ):
                 damage = 10
-                if hasattr(self, 'difficulty'
-                           ) and self.difficulty in DIFFICULTY_SETTINGS:
-                    damage = DIFFICULTY_SETTINGS[
-                        self.difficulty]["enemy_damage"]
+                if (
+                    hasattr(self, "difficulty")
+                    and self.difficulty in DIFFICULTY_SETTINGS
+                ):
+                    damage = DIFFICULTY_SETTINGS[self.difficulty][
+                        "enemy_damage"
+                    ]
 
-                if hasattr(self, 'player_shield') and self.player_shield > 0:
+                if hasattr(self, "player_shield") and self.player_shield > 0:
                     self.player_shield -= damage
                     if self.player_shield < 0:
                         self.player_health += self.player_shield
@@ -2919,13 +3340,16 @@ class Game:
                 else:
                     self.player_health -= damage
 
-                self.play_sound('hit')
+                self.play_sound("hit")
 
                 if self.particle_effects:
-                    hit_pos = (self.player_pos[0] + random.uniform(-10, 10),
-                               self.player_pos[1] + random.uniform(-10, 10))
-                    self.particles.add_particles(hit_pos, COLORS["RED"], 8,
-                                                 1.5, 20)
+                    hit_pos = (
+                        self.player_pos[0] + random.uniform(-10, 10),
+                        self.player_pos[1] + random.uniform(-10, 10),
+                    )
+                    self.particles.add_particles(
+                        hit_pos, COLORS["RED"], 8, 1.5, 20
+                    )
 
                 self.enemy_bullets.remove(bullet)
 
@@ -2933,23 +3357,27 @@ class Game:
                     self.player_died()
 
     def health_regeneration(self):
-        if self.player_stats[
-                "regen"] > 0 and self.player_health < self.player_stats[
-                    "max_health"]:
+        if (
+            self.player_stats["regen"] > 0
+            and self.player_health < self.player_stats["max_health"]
+        ):
             regen_amount = self.player_stats["regen"]
-            self.player_health = min(self.player_stats["max_health"],
-                                     self.player_health + regen_amount)
+            self.player_health = min(
+                self.player_stats["max_health"],
+                self.player_health + regen_amount,
+            )
 
     def player_died(self):
         self.is_dead = True
 
         self.respawn_time = time.time() + 5
 
-        self.play_sound('death')
+        self.play_sound("death")
 
         if self.particle_effects:
-            self.particles.add_particles(self.player_pos, COLORS["BLUE"], 30,
-                                         3.0, 60)
+            self.particles.add_particles(
+                self.player_pos, COLORS["BLUE"], 30, 3.0, 60
+            )
 
     def check_respawn(self):
         if self.is_dead and time.time() >= self.respawn_time:
@@ -2962,13 +3390,18 @@ class Game:
             while not safe_respawn and tries < 10:
                 self.player_pos = [
                     random.randint(100, WIDTH - 100),
-                    random.randint(100, HEIGHT - 100)
+                    random.randint(100, HEIGHT - 100),
                 ]
 
                 safe_respawn = True
                 for enemy in self.enemies:
-                    if math.hypot(self.player_pos[0] - enemy["pos"][0],
-                                  self.player_pos[1] - enemy["pos"][1]) < 200:
+                    if (
+                        math.hypot(
+                            self.player_pos[0] - enemy["pos"][0],
+                            self.player_pos[1] - enemy["pos"][1],
+                        )
+                        < 200
+                    ):
                         safe_respawn = False
                         break
 
@@ -3012,7 +3445,11 @@ class Game:
                 if self.current_screen == "loading":
                     continue
 
-                if self.current_screen == "main_menu" or self.current_screen == "host" or self.current_screen == "join":
+                if (
+                    self.current_screen == "main_menu"
+                    or self.current_screen == "host"
+                    or self.current_screen == "join"
+                ):
                     self.handle_menu_events(event)
                 else:
                     self.handle_game_events(event)
@@ -3022,13 +3459,13 @@ class Game:
                 self.loading_screen.draw()
 
                 if self.loading_screen.loading_complete:
-                    if not hasattr(self, 'completion_delay'):
+                    if not hasattr(self, "completion_delay"):
                         self.completion_delay = time.time() + 0.7
 
                     if time.time() >= self.completion_delay:
                         self.current_screen = "main_menu"
                         self.load_and_play_background_music()
-                        delattr(self, 'completion_delay')
+                        delattr(self, "completion_delay")
 
             elif self.current_screen == "game":
                 self.update_game()
@@ -3108,11 +3545,11 @@ if __name__ == "__main__":
         run_dedicated_server()
     else:
         try:
-            if not os.path.exists('assets'):
-                os.makedirs('assets')
+            if not os.path.exists("assets"):
+                os.makedirs("assets")
                 logger.info("Created assets directory")
-            if not os.path.exists('assets/sounds'):
-                os.makedirs('assets/sounds')
+            if not os.path.exists("assets/sounds"):
+                os.makedirs("assets/sounds")
                 logger.info("Created sounds directory")
 
             game = Game()
